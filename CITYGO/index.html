@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityGO | Explore Local & Global Shops</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* MAIN CSS */
+        :root {
+            --primary: #6366f1;
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --bg-dark: #0f172a;
+            --bg-light: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-pill: 50px;
+            --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            height: 65px;
+            background: var(--card-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            z-index: 10;
+        }
+
+        .app-container {
+            display: flex;
+            height: calc(100vh - 65px);
+            width: 100vw;
+        }
+
+        /* MAP CSS */
+        .map-view {
+            flex: 1;
+            height: 100%;
+            position: relative;
+            background: var(--bg-dark);
+        }
+
+        #mapCanvas {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+
+        #mapCanvas:active {
+            cursor: grabbing;
+        }
+
+        .map-controls {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 5;
+        }
+
+        .map-btn {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            box-shadow: var(--shadow-soft);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .map-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .zoom-tier-bar {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            padding: 6px 12px;
+            border-radius: var(--radius-pill);
+            display: flex;
+            gap: 8px;
+            z-index: 5;
+        }
+
+        /* COMPONENTS CSS */
+        .shop-sidebar {
+            width: 380px;
+            background: #f1f5f9;
+            padding: 1.25rem;
+            overflow-y: auto;
+        }
+
+        .shop-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-soft);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .shop-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .shop-detail-modal {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 420px;
+            height: 100%;
+            background: white;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+            z-index: 20;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .gallery-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .main-reference-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+        }
+
+        .top-images-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .top-images-grid img {
+            width: 100%;
+            height: 65px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .action-buttons-group {
+            display: flex;
+            gap: 10px;
+            margin: 1rem 0;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: var(--radius-pill);
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-call { background: #22c55e; color: white; }
+        .btn-message { background: #3b82f6; color: white; }
+
+        .close-panel {
+            float: right;
+            font-size: 0.82rem;
+            font-weight: 700;
+            background: #f1f5f9;
+            padding: 0.3rem 0.75rem;
+            border-radius: 50px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <h1 style="margin: 0; font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">📍 CityGO</h1>
+        </div>
+
+        <div style="flex: 1; max-width: 420px; margin: 0 1rem;">
+            <input type="text" id="searchInput" placeholder="🔍 Search shops, cafes, malls..." style="width: 100%; padding: 0.6rem 1rem; border: 2px solid #e2e8f0; border-radius: 50px; outline: none; font-size: 0.88rem; background: #f8fafc;">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <button class="map-btn" style="width: 40px; height: 40px; font-size: 1rem;" title="User Profile">👤</button>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <aside class="shop-sidebar">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 style="font-size: 1.1rem; font-weight: 800; margin: 0;">Local Ecosystem</h2>
+                <span id="liveShopCount" style="background: #e0e7ff; color: #3730a3; font-size: 0.75rem; padding: 0.25rem 0.65rem; border-radius: 50px; font-weight: 700;">Loading...</span>
+            </div>
+            
+            <div id="shopListContainer"></div>
+        </aside>
+
+        <main class="map-view">
+            <div style="position: absolute; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(8px); padding: 0.85rem 1.25rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); z-index: 5; max-width: 300px;">
+                <div id="mapLevelBadge" style="font-size: 0.75rem; font-weight: 800; color: #6366f1; text-transform: uppercase;">Level: Local Streets 📍</div>
+                <div id="userHomePin" style="font-size: 0.88rem; font-weight: 700; margin-top: 4px; color: #0f172a;">🏠 Focus: Downtown District</div>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">💡 Drag to pan. Scroll to zoom from continents to street doors.</div>
+            </div>
+
+            <div class="zoom-tier-bar">
+                <button class="map-btn" style="width: auto; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; height: 32px;" onclick="MapEngine.setZoomTier(5)">🌍 World</button>
+                <button class="map-btn" style="width: auto; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; height: 32px;" onclick="MapEngine.setZoomTier(50)">🏳️ Country</button>
+                <button class="map-btn" style="width: auto; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; height: 32px;" onclick="MapEngine.setZoomTier(300)">🏙️ District</button>
+                <button class="map-btn" style="width: auto; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; height: 32px;" onclick="MapEngine.setZoomTier(1800)">📍 Street</button>
+            </div>
+
+            <canvas id="mapCanvas"></canvas>
+
+            <div class="map-controls">
+                <button class="map-btn" onclick="MapEngine.zoom(1.3)" title="Zoom In">+</button>
+                <button class="map-btn" onclick="MapEngine.zoom(0.7)" title="Zoom Out">−</button>
+            </div>
+
+            <div id="shopDetailPanel" class="shop-detail-modal" style="display: none;"></div>
+        </main>
+    </div>
+
+    <script>
+        /* SHOPS ENGINE */
+        const ShopsEngine = (function () {
+            let shopDatabase = [
+                {
+                    id: "shop_101",
+                    name: "Grand Horizon Shopping Plaza",
+                    category: "Shopping Mall",
+                    rating: 4.8,
+                    reviewCount: 320,
+                    phone: "+15550192834",
+                    email: "contact@grandhorizon.com",
+                    chatLink: "https://wa.me/15550192834",
+                    address: "450 Grand Ave, Downtown",
+                    coordinates: { lat: 34.0562, lng: -118.2382 },
+                    mainImage: "https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?auto=format&fit=crop&w=800&q=80",
+                    galleryImages: [
+                        "https://images.unsplash.com/photo-1567449303078-57ad995bd301?auto=format&fit=crop&w=300&q=80",
+                        "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=300&q=80",
+                        "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=300&q=80",
+                        "https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=300&q=80"
+                    ],
+                    reviews: [
+                        { user: "Sarah L.", rating: 5, comment: "Amazing place! Tons of stores and great food court." },
+                        { user: "David M.", rating: 4, comment: "Very spacious, parking is easy to find." }
+                    ]
+                },
+                {
+                    id: "shop_102",
+                    name: "Artisan Coffee & Bakery",
+                    category: "Café & Bakery",
+                    rating: 4.9,
+                    reviewCount: 185,
+                    phone: "+15550183344",
+                    email: "hello@artisancoffee.com",
+                    chatLink: "https://wa.me/15550183344",
+                    address: "122 Main Street, District 4",
+                    coordinates: { lat: 34.0487, lng: -118.2489 },
+                    mainImage: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80",
+                    galleryImages: [
+                        "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=300&q=80",
+                        "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=300&q=80",
+                        "https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=300&q=80",
+                        "https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=300&q=80"
+                    ],
+                    reviews: [
+                        { user: "Emma W.", rating: 5, comment: "Best espresso and sourdough pastries in the city!" }
+                    ]
+                },
+                {
+                    id: "shop_103",
+                    name: "Skyline Luxury Suites",
+                    category: "Hotel & Apartment",
+                    rating: 4.7,
+                    reviewCount: 94,
+                    phone: "+15550129988",
+                    email: "stay@skylinesuites.com",
+                    chatLink: "https://wa.me/15550129988",
+                    address: "88 Tower Road",
+                    coordinates: { lat: 34.0580, lng: -118.2510 },
+                    mainImage: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+                    galleryImages: [
+                        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=300&q=80",
+                        "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=300&q=80",
+                        "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=300&q=80",
+                        "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=300&q=80"
+                    ],
+                    reviews: [
+                        { user: "Alex K.", rating: 5, comment: "Breathtaking views and top-tier service." }
+                    ]
+                }
+            ];
+
+            return {
+                getAllShops: () => shopDatabase,
+                getShopById: (id) => shopDatabase.find(shop => shop.id === id),
+                filterShops: (query = "") => {
+                    const q = query.toLowerCase().trim();
+                    return shopDatabase.filter(shop => !q || shop.name.toLowerCase().includes(q) || shop.category.toLowerCase().includes(q));
+                }
+            };
+        })();
+
+        /* MAP ENGINE */
+        const MapEngine = (function () {
+            let canvas = null, ctx = null;
+            let zoomScale = 1800;
+            let centerLat = 34.0522, centerLon = -118.2437;
+            let isDragging = false, dragStartMouse = { x: 0, y: 0 }, dragStartCenter = { lat: 0, lon: 0 };
+            let hoveredShopId = null, currentShops = [];
+            let activeUserLocation = { lat: 34.0522, lon: -118.2437, address: "Home" };
+
+            function init() {
+                canvas = document.getElementById("mapCanvas");
+                if (!canvas) return;
+                ctx = canvas.getContext("2d");
+                resizeCanvas();
+
+                window.addEventListener("resize", () => { resizeCanvas(); draw(); });
+                canvas.addEventListener("mousedown", (e) => {
+                    isDragging = true;
+                    dragStartMouse = { x: e.clientX, y: e.clientY };
+                    dragStartCenter = { lat: centerLat, lon: centerLon };
+                });
+                canvas.addEventListener("mousemove", (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left, mouseY = e.clientY - rect.top;
+
+                    if (isDragging) {
+                        const dx = e.clientX - dragStartMouse.x, dy = e.clientY - dragStartMouse.y;
+                        centerLon = dragStartCenter.lon - (dx / (canvas.width * 0.0025 * zoomScale));
+                        centerLat = dragStartCenter.lat + (dy / (canvas.height * 0.0025 * zoomScale));
+                        draw();
+                        return;
+                    }
+
+                    let foundHover = false;
+                    for (const shop of currentShops) {
+                        const pos = latLonToPixel(shop.coordinates.lat, shop.coordinates.lng);
+                        if (Math.hypot(mouseX - pos.x, mouseY - pos.y) <= 12) {
+                            hoveredShopId = shop.id;
+                            foundHover = true;
+                            canvas.style.cursor = "pointer";
+                            break;
+                        }
+                    }
+                    if (!foundHover) { hoveredShopId = null; canvas.style.cursor = "grab"; }
+                    draw();
+                });
+                window.addEventListener("mouseup", () => { isDragging = false; });
+                canvas.addEventListener("wheel", (e) => { e.preventDefault(); zoom(e.deltaY < 0 ? 1.2 : 0.83); }, { passive: false });
+                canvas.addEventListener("click", () => {
+                    if (hoveredShopId && typeof UI !== "undefined") UI.openShopDetails(hoveredShopId);
+                });
+
+                draw();
+            }
+
+            function resizeCanvas() {
+                if (!canvas || !canvas.parentElement) return;
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+            }
+
+            function latLonToPixel(lat, lon) {
+                return {
+                    x: (canvas.width / 2) + (lon - centerLon) * (canvas.width / 360) * zoomScale,
+                    y: (canvas.height / 2) - (lat - centerLat) * (canvas.height / 180) * zoomScale
+                };
+            }
+
+            function zoom(factor) {
+                zoomScale = Math.min(Math.max(1, zoomScale * factor), 5000);
+                draw();
+            }
+
+            function setZoomTier(targetScale) { zoomScale = targetScale; draw(); }
+
+            function draw() {
+                if (!ctx) return;
+                ctx.fillStyle = "#0f172a";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                if (zoomScale >= 200) {
+                    const userPos = latLonToPixel(activeUserLocation.lat, activeUserLocation.lon);
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+                    ctx.lineWidth = Math.max(1.5, zoomScale * 0.008);
+
+                    for (let i = -10; i <= 10; i++) {
+                        const offset = i * (zoomScale * 0.012);
+                        ctx.beginPath(); ctx.moveTo(0, userPos.y + offset); ctx.lineTo(canvas.width, userPos.y + offset); ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(userPos.x + offset, 0); ctx.lineTo(userPos.x + offset, canvas.height); ctx.stroke();
+                    }
+                }
+
+                currentShops.forEach((shop) => {
+                    const pos = latLonToPixel(shop.coordinates.lat, shop.coordinates.lng);
+                    const isHovered = shop.id === hoveredShopId;
+
+                    ctx.fillStyle = isHovered ? "#a855f7" : "#22c55e";
+                    ctx.beginPath(); ctx.arc(pos.x, pos.y, isHovered ? 8 : 6, 0, Math.PI * 2); ctx.fill();
+                    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2; ctx.stroke();
+
+                    if (zoomScale >= 400 || isHovered) {
+                        ctx.fillStyle = "#ffffff";
+                        ctx.font = isHovered ? "bold 12px sans-serif" : "600 11px sans-serif";
+                        ctx.fillText(shop.name, pos.x + 12, pos.y + 4);
+                    }
+                });
+
+                const userPos = latLonToPixel(activeUserLocation.lat, activeUserLocation.lon);
+                ctx.fillStyle = "#6366f1";
+                ctx.beginPath(); ctx.arc(userPos.x, userPos.y, 9, 0, Math.PI * 2); ctx.fill();
+                ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2.5; ctx.stroke();
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 11px sans-serif";
+                ctx.fillText("🏠 My Location", userPos.x - 30, userPos.y - 15);
+            }
+
+            return {
+                init,
+                zoom,
+                setZoomTier,
+                setShops: (shops) => { currentShops = shops || []; draw(); },
+                centerOn: (lat, lon, z = 1800) => { centerLat = lat; centerLon = lon; zoomScale = z; draw(); }
+            };
+        })();
+
+        /* UI MODULE */
+        const UI = (function () {
+            function renderShopList(shops) {
+                const container = document.getElementById("shopListContainer");
+                if (!container) return;
+                container.innerHTML = "";
+
+                shops.forEach((shop) => {
+                    const card = document.createElement("div");
+                    card.className = "shop-card";
+                    card.onclick = () => openShopDetails(shop.id);
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between;">
+                            <h3 style="margin:0; font-size: 1.05rem;">${shop.name}</h3>
+                            <span style="color: #f59e0b; font-weight:700;">★ ${shop.rating}</span>
+                        </div>
+                        <div style="font-size:0.8rem; color:#6366f1; margin: 0.2rem 0;">${shop.category}</div>
+                        <div style="font-size:0.8rem; color:#64748b;">📍 ${shop.address}</div>
+                    `;
+                    container.appendChild(card);
+                });
+
+                document.getElementById("liveShopCount").innerText = `${shops.length} Places Found`;
+            }
+
+            function openShopDetails(shopId) {
+                const shop = ShopsEngine.getShopById(shopId);
+                if (!shop) return;
+
+                MapEngine.centerOn(shop.coordinates.lat, shop.coordinates.lng, 2200);
+
+                const panel = document.getElementById("shopDetailPanel");
+                panel.innerHTML = `
+                    <span class="close-panel" onclick="UI.closeShopDetails()">✖ Close</span>
+                    <h2 style="margin:0 0 0.2rem 0;">${shop.name}</h2>
+                    <div style="color: #f59e0b; font-weight: 700; margin-bottom: 0.8rem;">★ ${shop.rating} (${shop.reviewCount} reviews) • ${shop.category}</div>
+
+                    <div class="gallery-container">
+                        <img src="${shop.mainImage}" alt="Main View" class="main-reference-img" id="featuredMainImg">
+                        <div class="top-images-grid">
+                            ${shop.galleryImages.map(img => `<img src="${img}" onclick="UI.swapMainImage('${img}')">`).join('')}
+                        </div>
+                    </div>
+
+                    <div class="action-buttons-group">
+                        <a href="tel:${shop.phone}" class="btn-action btn-call" style="text-decoration:none;">📞 Call Shop</a>
+                        <a href="${shop.chatLink}" target="_blank" class="btn-action btn-message" style="text-decoration:none;">💬 Message</a>
+                    </div>
+
+                    <div style="margin-top: 1rem; font-size: 0.85rem; color: #475569;"><strong>Address:</strong> ${shop.address}</div>
+                `;
+                panel.style.display = "block";
+            }
+
+            return {
+                renderShopList,
+                openShopDetails,
+                closeShopDetails: () => { document.getElementById("shopDetailPanel").style.display = "none"; },
+                swapMainImage: (src) => { document.getElementById("featuredMainImg").src = src; }
+            };
+        })();
+
+        /* INITIALIZATION */
+        window.addEventListener("DOMContentLoaded", () => {
+            MapEngine.init();
+            const shops = ShopsEngine.getAllShops();
+            UI.renderShopList(shops);
+            MapEngine.setShops(shops);
+
+            document.getElementById("searchInput").addEventListener("input", (e) => {
+                const filtered = ShopsEngine.filterShops(e.target.value);
+                UI.renderShopList(filtered);
+                MapEngine.setShops(filtered);
+            });
+        });
+    </script>
+</body>
+</html>
