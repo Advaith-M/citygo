@@ -1,0 +1,443 @@
+/* ==========================================================================
+   CITYGO SYSTEM ARCHITECTURE - LUXURY SIDEBAR & DIRECTORY CORE STYLES
+   ==========================================================================
+   File Name: css/luxury-core.css
+   Role: Styles the left directory sidebar container, brand header badge,
+         bubbly live search input, category tag carousel, directory stats bar,
+         and interactive shop cards listing.
+   Dependencies: css/main.css
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. SIDEBAR CONTAINER & LAYOUT STRUCTURE
+   -------------------------------------------------------------------------- */
+.luxury-sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--color-bg-surface);
+  border-right: var(--border-light);
+  box-shadow: var(--shadow-bubbly-md);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  position: relative;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   2. SIDEBAR HEADER & BRAND BADGE
+   -------------------------------------------------------------------------- */
+.sidebar-header {
+  padding: 28px 24px 16px 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(252, 253, 254, 0.8) 100%);
+  border-bottom: var(--border-light);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--color-accent-purple-soft);
+  border-radius: var(--radius-pill);
+  width: fit-content;
+  border: 1px solid rgba(138, 79, 255, 0.15);
+}
+
+.logo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-accent-purple);
+  box-shadow: 0 0 8px var(--color-accent-purple);
+}
+
+.brand-title {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--color-accent-purple);
+  text-transform: uppercase;
+}
+
+.version-tag {
+  font-family: var(--font-tech);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  opacity: 0.8;
+}
+
+.sidebar-title {
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.sidebar-subtitle {
+  font-size: 13.5px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+/* --------------------------------------------------------------------------
+   3. BUBBLY SEARCH INPUT BAR
+   -------------------------------------------------------------------------- */
+.luxury-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.luxury-search-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 42px 0 46px;
+  background-color: var(--color-bg-subtle);
+  border: var(--border-bubbly);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  transition: var(--transition-bubbly);
+  outline: none;
+}
+
+.luxury-search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.luxury-search-input:focus {
+  background-color: var(--color-bg-surface);
+  border-color: var(--color-accent-purple);
+  box-shadow: var(--shadow-bubbly-md), var(--shadow-glow-purple);
+}
+
+.search-icon-btn {
+  position: absolute;
+  left: 14px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.luxury-search-input:focus ~ .search-icon-btn,
+.search-icon-btn:hover {
+  color: var(--color-accent-purple);
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 14px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--color-text-muted);
+  color: #ffffff;
+  border: none;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.search-clear-btn:hover {
+  background-color: var(--color-accent-pink);
+  transform: scale(1.1);
+}
+
+/* --------------------------------------------------------------------------
+   4. CATEGORY FILTER CAROUSEL TAGS
+   -------------------------------------------------------------------------- */
+.filter-carousel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  border-bottom: var(--border-light);
+  background-color: var(--color-bg-surface);
+}
+
+.filter-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.bubbly-tag {
+  flex: 0 0 auto;
+  padding: 8px 16px;
+  background-color: var(--color-bg-subtle);
+  border: var(--border-light);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: var(--transition-bubbly);
+  white-space: nowrap;
+}
+
+.bubbly-tag:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+  transform: translateY(-2px);
+}
+
+.bubbly-tag.active {
+  background: linear-gradient(135deg, var(--color-accent-purple), var(--color-accent-pink));
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: var(--shadow-bubbly-sm), var(--shadow-glow-pink);
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* --------------------------------------------------------------------------
+   5. DIRECTORY STATS & SORT BAR
+   -------------------------------------------------------------------------- */
+.directory-stats-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background-color: var(--color-bg-main);
+  border-bottom: var(--border-light);
+}
+
+.stats-text {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.stats-text strong {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+.bubbly-select {
+  padding: 6px 12px;
+  background-color: var(--color-bg-surface);
+  border: var(--border-light);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  outline: none;
+  transition: var(--transition-smooth);
+}
+
+.bubbly-select:focus,
+.bubbly-select:hover {
+  border-color: var(--color-accent-purple);
+  color: var(--color-text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   6. SHOP CARDS CONTAINER & CARD STYLES
+   -------------------------------------------------------------------------- */
+.shop-cards-container {
+  flex: 1;
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bubbly-card {
+  background: var(--color-bg-surface);
+  border: var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  gap: 14px;
+  cursor: pointer;
+  transition: var(--transition-bubbly);
+  box-shadow: var(--shadow-bubbly-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.bubbly-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: var(--shadow-bubbly-lg);
+  border-color: rgba(138, 79, 255, 0.3);
+}
+
+.bubbly-card.card-active {
+  border: 2px solid var(--color-accent-purple);
+  box-shadow: var(--shadow-bubbly-lg), var(--shadow-glow-purple);
+  background-color: var(--color-accent-purple-soft);
+}
+
+.card-image-wrap {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.card-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--transition-bubbly);
+}
+
+.bubbly-card:hover .card-image-wrap img {
+  transform: scale(1.08);
+}
+
+.card-price-badge {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  padding: 2px 6px;
+  background: rgba(18, 24, 38, 0.75);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  border-radius: var(--radius-xs);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-category {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-accent-purple);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.rating-pill {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-accent-gold);
+  background: var(--color-accent-gold-soft);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.card-title {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-address-subtle {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-footer-meta {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   7. EMPTY STATE & SKELETON LOADERS
+   -------------------------------------------------------------------------- */
+.empty-state-box {
+  padding: 40px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.empty-icon {
+  font-size: 40px;
+}
+
+.empty-title {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.empty-desc {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  max-width: 260px;
+}
+
+.bubbly-button-secondary {
+  margin-top: 8px;
+  padding: 10px 20px;
+  background-color: var(--color-bg-subtle);
+  border: var(--border-bubbly);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: var(--transition-bubbly);
+}
+
+.bubbly-button-secondary:hover {
+  background-color: var(--color-accent-purple-soft);
+  color: var(--color-accent-purple);
+  border-color: var(--color-accent-purple);
+  transform: translateY(-2px);
+}
+
+.sidebar-footer {
+  padding: 14px 24px;
+  background-color: var(--color-bg-surface);
+  border-top: var(--border-light);
+  text-align: center;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}

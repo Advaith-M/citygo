@@ -1,0 +1,195 @@
+/* ==========================================================================
+   CITYGO SYSTEM ARCHITECTURE - MAIN GLOBAL STYLESHEET
+   ==========================================================================
+   File Name: css/main.css
+   Role: Design tokens, CSS variables, global resets, typography, 
+         background gradients, layout root wrapper, and keyframe animations.
+   Dependencies: Google Fonts (Outfit, Plus Jakarta Sans, Orbitron)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. DESIGN TOKENS & CSS VARIABLE SYSTEM (Bright White & Bubbly Aesthetic)
+   -------------------------------------------------------------------------- */
+:root {
+  /* Color Palette - Bright Pure White Base with Soft Pastel Accents */
+  --color-bg-main: #fcfdfe;
+  --color-bg-surface: #ffffff;
+  --color-bg-subtle: #f3f5f9;
+  --color-bg-hover: #eaf0f8;
+  
+  /* Brand Accent Colors */
+  --color-accent-pink: #ff6b9d;
+  --color-accent-pink-soft: #fff0f5;
+  --color-accent-purple: #8a4fff;
+  --color-accent-purple-soft: #f4efff;
+  --color-accent-blue: #3a86ff;
+  --color-accent-blue-soft: #eef5ff;
+  --color-accent-gold: #ffb703;
+  --color-accent-gold-soft: #fff9e6;
+
+  /* Text & Typography Colors */
+  --color-text-primary: #121826;
+  --color-text-secondary: #4c566a;
+  --color-text-muted: #8c98a9;
+  --color-text-on-accent: #ffffff;
+
+  /* Borders & Dividers */
+  --border-light: 1px solid rgba(226, 232, 240, 0.8);
+  --border-bubbly: 2px solid #e2e8f0;
+  --border-focus: 2px solid var(--color-accent-purple);
+
+  /* Typography Fonts */
+  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-tech: 'Orbitron', monospace;
+
+  /* Border Radii (Ultra Rounded Bubbly Shapes) */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-pill: 9999px;
+
+  /* Shadows - Layered Soft Glassmorphism Depth */
+  --shadow-bubbly-sm: 0 4px 12px rgba(18, 24, 38, 0.04);
+  --shadow-bubbly-md: 0 8px 24px rgba(18, 24, 38, 0.08), 0 2px 6px rgba(18, 24, 38, 0.02);
+  --shadow-bubbly-lg: 0 16px 40px rgba(138, 79, 255, 0.12), 0 4px 12px rgba(18, 24, 38, 0.04);
+  --shadow-glow-pink: 0 0 20px rgba(255, 107, 157, 0.3);
+  --shadow-glow-purple: 0 0 20px rgba(138, 79, 255, 0.3);
+
+  /* Transitions & Animation Easing */
+  --transition-bubbly: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-smooth: all 0.25s ease-out;
+
+  /* Layout Dimensions */
+  --sidebar-width: 440px;
+}
+
+/* --------------------------------------------------------------------------
+   2. MODERN CSS RESET & GLOBAL BASE STYLES
+   -------------------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-body);
+  background-color: var(--color-bg-main);
+  color: var(--color-text-primary);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* Utility Class for Screen Readers */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Hidden Utility */
+.hidden {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. ATMOSPHERIC BACKGROUND ORBS & GLOW EFFECTS
+   -------------------------------------------------------------------------- */
+.glow-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(90px);
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.glow-orb-top-left {
+  width: 350px;
+  height: 350px;
+  top: -100px;
+  left: -100px;
+  background: radial-gradient(circle, rgba(255,107,157,0.2) 0%, rgba(255,255,255,0) 70%);
+}
+
+.glow-orb-bottom-right {
+  width: 450px;
+  height: 450px;
+  bottom: -150px;
+  right: -150px;
+  background: radial-gradient(circle, rgba(138,79,255,0.18) 0%, rgba(255,255,255,0) 70%);
+}
+
+/* --------------------------------------------------------------------------
+   4. APPLICATION LAYOUT CONTAINER WRAPPER
+   -------------------------------------------------------------------------- */
+.app-layout-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  background-color: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   5. GLOBAL KEYFRAME ANIMATIONS
+   -------------------------------------------------------------------------- */
+@keyframes bubblyPop {
+  0% {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(138, 79, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 16px rgba(138, 79, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(138, 79, 255, 0);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
