@@ -1,0 +1,127 @@
+/* ==========================================================================
+   CITYGO SYSTEM ARCHITECTURE - MAP STYLESHEET
+   ========================================================================== */
+
+#map-container {
+  flex: 1;
+  height: 100vh;
+  position: relative;
+  background: var(--bg-core);
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-core) !important;
+}
+
+/* Custom Radar Pin Marker */
+.custom-map-pin {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pin-dot {
+  width: 12px;
+  height: 12px;
+  background: var(--neon-cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+  z-index: 2;
+}
+
+.pin-pulse {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--neon-cyan);
+  border-radius: 50%;
+  animation: radar-expand 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+  z-index: 1;
+}
+
+@keyframes radar-expand {
+  0% {
+    transform: scale(0.3);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+/* Leaflet Dark UI Overrides */
+.leaflet-control-zoom {
+  border: 1px solid var(--border-dim) !important;
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(10px);
+  border-radius: 8px !important;
+  overflow: hidden;
+  box-shadow: var(--shadow-heavy) !important;
+}
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+  background: transparent !important;
+  color: var(--neon-cyan) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+  font-family: var(--font-hud) !important;
+  transition: var(--transition-smooth);
+}
+
+.leaflet-control-zoom-in:hover,
+.leaflet-control-zoom-out:hover {
+  background: var(--neon-cyan) !important;
+  color: var(--bg-core) !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(16px);
+  color: var(--text-main) !important;
+  border: 1px solid var(--neon-cyan) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 0 30px rgba(0, 242, 254, 0.25) !important;
+  padding: 8px !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--bg-surface-primary) !important;
+  border: 1px solid var(--neon-cyan);
+}
+
+.map-popup h3 {
+  font-family: var(--font-hud);
+  font-size: 1rem;
+  color: var(--neon-cyan);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.map-popup p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.map-popup button {
+  width: 100%;
+  padding: 8px;
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+  border: none;
+  color: var(--bg-core);
+  font-family: var(--font-hud);
+  font-weight: 800;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.map-popup button:hover {
+  box-shadow: 0 0 15px var(--neon-cyan);
+  transform: translateY(-1px);
+}
