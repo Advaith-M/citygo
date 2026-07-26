@@ -1,0 +1,87 @@
+/* ==========================================================================
+   CITYGO MAP VIEWPORT & RADAR OVERLAYS
+   ========================================================================== */
+
+#map-viewport {
+  flex: 1;
+  height: 100vh;
+  position: relative;
+  background-color: var(--bg-secondary);
+}
+
+/* Tile Aesthetics */
+.leaflet-tile-container img {
+  filter: saturate(0.85) contrast(1.02) brightness(1.01);
+}
+
+/* Radar Pulse Markers */
+.bubbly-map-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.marker-inner-core {
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, var(--accent-rose), var(--accent-lavender));
+  border: 3px solid var(--text-white);
+  border-radius: 50%;
+  box-shadow: var(--shadow-glow-pink);
+  z-index: 2;
+  transition: var(--transition-bubbly);
+}
+
+.marker-pulse-ring {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: var(--accent-rose-soft);
+  border: 1px solid var(--accent-rose);
+  border-radius: 50%;
+  z-index: 1;
+  animation: pulseMarker 2.5s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+@keyframes pulseMarker {
+  0% { transform: scale(0.4); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.bubbly-map-marker:hover .marker-inner-core {
+  transform: scale(1.4);
+  background: var(--accent-rose);
+}
+
+/* Popups Override */
+.leaflet-popup-content-wrapper {
+  background: var(--bg-glass-pure) !important;
+  backdrop-filter: var(--bg-backdrop-blur);
+  border-radius: var(--radius-bubble-md) !important;
+  box-shadow: var(--shadow-soft-lg) !important;
+  border: 1px solid var(--border-glow) !important;
+  padding: 8px !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--bg-primary) !important;
+}
+
+.luxury-popup-card {
+  padding: 8px;
+  text-align: center;
+}
+
+.luxury-popup-card h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-headline);
+  margin-bottom: 4px;
+}
+
+.luxury-popup-card p {
+  font-size: 0.85rem;
+  color: var(--text-subtle);
+  margin-bottom: 12px;
+}
