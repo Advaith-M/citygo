@@ -1,163 +1,916 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>CityGO — High-Tech Global Shop Explorer & Bubbly Directory</title>
-  <meta name="description" content="Discover ultra-luxurious, aesthetic, and bubbly venues across global cities with CityGO interactive map navigation.">
-  <meta name="theme-color" content="#ffffff">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CityGO — Bubbly Urban Explorer & Directory</title>
 
-  <!-- Favicon Preloads -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>">
+  <!-- Google Fonts System -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Google Fonts Preconnect & Styling -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Orbitron:wght@400;600;800;900&display=swap" rel="stylesheet">
-
-  <!-- Leaflet GIS Map Engine Core Stylesheet -->
+  <!-- Leaflet GIS Mapping Framework Core Stylesheet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
-  <!-- CityGO Modular CSS Architecture (Strict Loading Sequence) -->
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/luxury-core.css">
-  <link rel="stylesheet" href="css/map.css">
-  <link rel="stylesheet" href="css/components.css">
-</head>
-<body class="citygo-light-theme">
-
-  <!-- Atmospheric Background Glow Elements -->
-  <div class="glow-orb glow-orb-top-left" aria-hidden="true"></div>
-  <div class="glow-orb glow-orb-bottom-right" aria-hidden="true"></div>
-
-  <!-- Main System Application Wrapper -->
-  <div id="app-root" class="app-layout-container">
-
-    <!-- ==================================================================== -->
-    <!-- LEFT NAVIGATION & DIRECTORY SIDEBAR SECTION                          -->
-    <!-- ==================================================================== -->
-    <aside id="sidebar-navigation" class="luxury-sidebar" aria-label="City Directory Sidebar">
+  <!-- Integrated System Stylesheet Core Engine -->
+  <style>
+    /* ==========================================================================
+       1. DESIGN TOKENS & CSS VARIABLE SYSTEM
+       ========================================================================== */
+    :root {
+      --color-bg-main: #fcfdfe;
+      --color-bg-surface: #ffffff;
+      --color-bg-subtle: #f3f5f9;
+      --color-bg-hover: #eaf0f8;
       
-      <!-- Brand & Header Banner -->
-      <header class="sidebar-header">
-        <div class="brand-badge" role="banner">
-          <div class="logo-dot" aria-hidden="true"></div>
-          <span class="brand-title">CityGO Luxury</span>
-          <span class="version-tag">v2.4</span>
-        </div>
-        <h1 class="sidebar-title">Explore Global Venues</h1>
-        <p class="sidebar-subtitle">Curated aesthetic shops, boutiques, and high-end dining experiences.</p>
+      --color-accent-pink: #ff6b9d;
+      --color-accent-pink-soft: #fff0f5;
+      --color-accent-purple: #8a4fff;
+      --color-accent-purple-soft: #f4efff;
+      --color-accent-blue: #3a86ff;
+      --color-accent-blue-soft: #eef5ff;
+      --color-accent-gold: #ffb703;
+      --color-accent-gold-soft: #fff9e6;
 
-        <!-- Bubbly Search Bar -->
-        <div class="luxury-search-wrapper" role="search">
-          <button class="search-icon-btn" id="search-trigger-btn" aria-label="Execute Search">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-          </button>
-          <input 
-            type="text" 
-            id="search-input" 
-            class="luxury-search-input" 
-            placeholder="Search bakeries, cafes, luxury spas..." 
-            autocomplete="off"
-            aria-label="Search venues by name or category"
-          />
-          <button class="search-clear-btn hidden" id="search-clear-btn" aria-label="Clear Search Input">✕</button>
+      --color-text-primary: #121826;
+      --color-text-secondary: #4c566a;
+      --color-text-muted: #8c98a9;
+      --color-text-on-accent: #ffffff;
+
+      --border-light: 1px solid rgba(226, 232, 240, 0.8);
+      --border-bubbly: 2px solid #e2e8f0;
+      --border-focus: 2px solid var(--color-accent-purple);
+
+      --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-tech: 'Orbitron', monospace;
+
+      --radius-xs: 8px;
+      --radius-sm: 12px;
+      --radius-md: 20px;
+      --radius-lg: 28px;
+      --radius-pill: 9999px;
+
+      --shadow-bubbly-sm: 0 4px 12px rgba(18, 24, 38, 0.04);
+      --shadow-bubbly-md: 0 8px 24px rgba(18, 24, 38, 0.08), 0 2px 6px rgba(18, 24, 38, 0.02);
+      --shadow-bubbly-lg: 0 16px 40px rgba(138, 79, 255, 0.12), 0 4px 12px rgba(18, 24, 38, 0.04);
+      --shadow-glow-pink: 0 0 20px rgba(255, 107, 157, 0.3);
+      --shadow-glow-purple: 0 0 20px rgba(138, 79, 255, 0.3);
+
+      --transition-bubbly: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      --transition-smooth: all 0.25s ease-out;
+
+      --sidebar-width: 440px;
+    }
+
+    /* ==========================================================================
+       2. MODERN CSS RESET & GLOBAL LAYOUT
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--font-body);
+      background-color: var(--color-bg-main);
+      color: var(--color-text-primary);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .app-layout-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    /* ==========================================================================
+       3. SIDEBAR STYLES
+       ========================================================================== */
+    .luxury-sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-bg-surface);
+      border-right: var(--border-light);
+      box-shadow: var(--shadow-bubbly-md);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 24px 24px 16px 24px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(252, 253, 254, 0.8) 100%);
+      border-bottom: var(--border-light);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--color-accent-purple-soft);
+      border-radius: var(--radius-pill);
+      width: fit-content;
+      border: 1px solid rgba(138, 79, 255, 0.15);
+    }
+
+    .logo-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--color-accent-purple);
+      box-shadow: 0 0 8px var(--color-accent-purple);
+    }
+
+    .brand-title {
+      font-family: var(--font-heading);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--color-accent-purple);
+      text-transform: uppercase;
+    }
+
+    .sidebar-title {
+      font-family: var(--font-heading);
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--color-text-primary);
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    .sidebar-subtitle {
+      font-size: 13.5px;
+      color: var(--color-text-secondary);
+      line-height: 1.4;
+    }
+
+    /* Bubbly Search Wrapper */
+    .luxury-search-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .luxury-search-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 42px 0 46px;
+      background-color: var(--color-bg-subtle);
+      border: var(--border-bubbly);
+      border-radius: var(--radius-pill);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      transition: var(--transition-bubbly);
+      outline: none;
+    }
+
+    .luxury-search-input:focus {
+      background-color: var(--color-bg-surface);
+      border-color: var(--color-accent-purple);
+      box-shadow: var(--shadow-bubbly-md), var(--shadow-glow-purple);
+    }
+
+    .search-icon-btn {
+      position: absolute;
+      left: 16px;
+      background: transparent;
+      border: none;
+      color: var(--color-text-muted);
+      font-size: 16px;
+      pointer-events: none;
+    }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 14px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background-color: var(--color-text-muted);
+      color: #ffffff;
+      border: none;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    /* Filter Carousel */
+    .filter-carousel {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 24px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      border-bottom: var(--border-light);
+      background-color: var(--color-bg-surface);
+    }
+
+    .filter-carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .bubbly-tag {
+      flex: 0 0 auto;
+      padding: 8px 16px;
+      background-color: var(--color-bg-subtle);
+      border: var(--border-light);
+      border-radius: var(--radius-pill);
+      font-family: var(--font-heading);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: var(--transition-bubbly);
+      white-space: nowrap;
+    }
+
+    .bubbly-tag.active {
+      background: linear-gradient(135deg, var(--color-accent-purple), var(--color-accent-pink));
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: var(--shadow-bubbly-sm), var(--shadow-glow-pink);
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    /* Directory Stats Bar */
+    .directory-stats-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      background-color: var(--color-bg-main);
+      border-bottom: var(--border-light);
+    }
+
+    .stats-text {
+      font-size: 13px;
+      color: var(--color-text-muted);
+    }
+
+    .stats-text strong {
+      color: var(--color-text-primary);
+      font-weight: 700;
+    }
+
+    .bubbly-select {
+      padding: 6px 12px;
+      background-color: var(--color-bg-surface);
+      border: var(--border-light);
+      border-radius: var(--radius-pill);
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* Shop Cards Container */
+    .shop-cards-container {
+      flex: 1;
+      padding: 20px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .bubbly-card {
+      background: var(--color-bg-surface);
+      border: var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      gap: 14px;
+      cursor: pointer;
+      transition: var(--transition-bubbly);
+      box-shadow: var(--shadow-bubbly-sm);
+    }
+
+    .bubbly-card:hover {
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: var(--shadow-bubbly-lg);
+      border-color: rgba(138, 79, 255, 0.3);
+    }
+
+    .bubbly-card.card-active {
+      border: 2px solid var(--color-accent-purple);
+      box-shadow: var(--shadow-bubbly-lg), var(--shadow-glow-purple);
+      background-color: var(--color-accent-purple-soft);
+    }
+
+    .card-image-wrap {
+      width: 88px;
+      height: 88px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .card-image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .card-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-category {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-accent-purple);
+      text-transform: uppercase;
+    }
+
+    .rating-pill {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-accent-gold);
+      background: var(--color-accent-gold-soft);
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+    }
+
+    .card-title {
+      font-family: var(--font-heading);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-address-subtle {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ==========================================================================
+       4. MAP VIEWPORT STYLES
+       ========================================================================== */
+    .map-viewport-container {
+      flex: 1;
+      height: 100vh;
+      position: relative;
+      background-color: #f8fafc;
+    }
+
+    #map-viewport {
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Marker Radar Pins */
+    .bubbly-map-marker-wrap {
+      background: transparent;
+      border: none;
+    }
+
+    .bubbly-map-marker {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .marker-pulse-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(138, 79, 255, 0.25);
+      animation: pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    .marker-inner-core {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2.5px solid var(--color-accent-purple);
+      box-shadow: var(--shadow-bubbly-md), var(--shadow-glow-purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      transition: var(--transition-bubbly);
+    }
+
+    .marker-emoji {
+      font-size: 18px;
+    }
+
+    /* Popups */
+    .leaflet-popup-content-wrapper {
+      padding: 0;
+      border-radius: var(--radius-md) !important;
+      background: rgba(255, 255, 255, 0.96) !important;
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-bubbly-lg) !important;
+      border: var(--border-light) !important;
+      overflow: hidden;
+    }
+
+    .luxury-popup-card {
+      padding: 16px;
+      width: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .popup-title {
+      font-family: var(--font-heading);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    /* ==========================================================================
+       5. DETAIL MODAL SLIDE-OUT PANEL
+       ========================================================================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(18, 24, 38, 0.4);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-panel {
+      width: 100%;
+      max-width: 500px;
+      height: 100%;
+      background: var(--color-bg-surface);
+      box-shadow: -10px 0 40px rgba(18, 24, 38, 0.15);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-overlay.active .modal-panel {
+      transform: translateX(0);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      border: var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      z-index: 10;
+      box-shadow: var(--shadow-bubbly-sm);
+    }
+
+    .modal-hero {
+      width: 100%;
+      height: 240px;
+      background: var(--color-bg-subtle);
+    }
+
+    .modal-hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .modal-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Keyframes */
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(138, 79, 255, 0.4); }
+      70% { box-shadow: 0 0 0 16px rgba(138, 79, 255, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(138, 79, 255, 0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout-container">
+    
+    <!-- Left Sidebar Directory -->
+    <aside class="luxury-sidebar">
+      <header class="sidebar-header">
+        <div class="brand-badge">
+          <div class="logo-dot"></div>
+          <span class="brand-title">CityGO Explorer</span>
+        </div>
+        <h1 class="sidebar-title">Discover Tokio</h1>
+        <p class="sidebar-subtitle">Curated aesthetic venues & local gems.</p>
+        
+        <div class="luxury-search-wrapper">
+          <span class="search-icon-btn">🔍</span>
+          <input type="text" id="search-input" class="luxury-search-input" placeholder="Search cafes, ramen, fashion..." />
+          <button id="search-clear-btn" class="search-clear-btn" style="display: none;">✕</button>
         </div>
       </header>
 
-      <!-- Category Filter Buttons Horizontal Scroll Bar -->
-      <nav id="filter-carousel" class="filter-carousel" aria-label="Category Filters">
-        <button class="bubbly-tag active" data-category="all">✨ All Places</button>
-        <button class="bubbly-tag" data-category="bakery">🥐 Bakeries</button>
-        <button class="bubbly-tag" data-category="restaurant">🍷 Fine Dining</button>
-        <button class="bubbly-tag" data-category="cafe">☕ Specialty Cafes</button>
-        <button class="bubbly-tag" data-category="spa">🌸 Spas & Wellness</button>
+      <!-- Category Filter Chips -->
+      <nav class="filter-carousel" id="filter-carousel">
+        <button class="bubbly-tag active" data-category="ALL">✨ All Spots</button>
+        <button class="bubbly-tag" data-category="CAFE">☕ Cafes</button>
+        <button class="bubbly-tag" data-category="DINING">🍜 Dining</button>
+        <button class="bubbly-tag" data-category="SHOPPING">🛍️ Fashion</button>
+        <button class="bubbly-tag" data-category="CULTURE">🎨 Culture</button>
       </nav>
 
-      <!-- Directory Stats Header -->
+      <!-- Directory Stats Bar -->
       <div class="directory-stats-bar">
-        <span id="results-count" class="stats-text">Showing <strong>4</strong> venues</span>
-        <div class="sort-dropdown-wrapper">
-          <label for="sort-select" class="visually-hidden">Sort venues by</label>
-          <select id="sort-select" class="bubbly-select">
-            <option value="rating">Top Rated ★</option>
-            <option value="name">Name (A-Z)</option>
-            <option value="reviews">Most Reviews</option>
-          </select>
-        </div>
+        <span class="stats-text"><strong id="venue-count">0</strong> places found</span>
+        <select id="sort-select" class="bubbly-select">
+          <option value="rating">Top Rated ⭐</option>
+          <option value="name">Alphabetical A-Z</option>
+        </select>
       </div>
 
-      <!-- Shop Cards Listing Container -->
-      <section id="shop-cards-container" class="shop-cards-container" aria-live="polite">
-        <!-- JS dynamically injects shop cards here -->
-        <div class="bubbly-card-skeleton" aria-hidden="true">
-          <div class="skeleton-img"></div>
-          <div class="skeleton-text-group">
-            <div class="skeleton-line short"></div>
-            <div class="skeleton-line long"></div>
-            <div class="skeleton-line medium"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Sidebar Footer Status -->
-      <footer class="sidebar-footer">
-        <p>© 2026 CityGO Interactive • Powered by Leaflet GIS</p>
-      </footer>
-
+      <!-- Shop Cards Listing -->
+      <div class="shop-cards-container" id="shop-cards-list">
+        <!-- Rendered Dynamically -->
+      </div>
     </aside>
 
-    <!-- ==================================================================== -->
-    <!-- INTERACTIVE MAP VIEWPORT SECTION                                     -->
-    <!-- ==================================================================== -->
-    <main id="map-viewport" class="map-viewport-container" aria-label="Interactive Map Viewport">
-      
-      <!-- Floating Map Control Bar -->
-      <div class="map-overlay-controls">
-        <button id="recenter-map-btn" class="bubbly-map-btn" title="Recenter Map View">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polygon points="12 2 19 21 12 17 5 21 12 2"></polygon>
-          </svg>
-          Recenter
-        </button>
-        <button id="toggle-layer-btn" class="bubbly-map-btn" title="Toggle Map Style">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-            <polyline points="2 17 12 22 22 17"></polyline>
-            <polyline points="2 12 12 17 22 12"></polyline>
-          </svg>
-          Tiles
-        </button>
-      </div>
-
-      <!-- Map Loading Spinner Overlay -->
-      <div id="map-loader" class="map-loader-overlay">
-        <div class="bubbly-spinner"></div>
-        <span>Loading CityGO Map Engine...</span>
-      </div>
-
+    <!-- Right GIS Interactive Map -->
+    <main class="map-viewport-container">
+      <div id="map-viewport"></div>
     </main>
-
-    <!-- ==================================================================== -->
-    <!-- DYNAMIC SLIDE-OUT DETAIL PANEL MODAL                                 -->
-    <!-- ==================================================================== -->
-    <dialog id="luxury-detail-panel" class="luxury-detail-panel panel-hidden" aria-label="Venue Detailed View">
-      <!-- Dynamic Venue Details rendered by js/ui.js -->
-    </dialog>
 
   </div>
 
-  <!-- Leaflet GIS JavaScript Engine -->
+  <!-- Venue Detail Slide-Out Modal -->
+  <div class="modal-overlay" id="venue-modal">
+    <div class="modal-panel">
+      <button class="modal-close-btn" id="modal-close-btn">✕</button>
+      <div class="modal-hero">
+        <img id="modal-img" src="" alt="Venue detail image" />
+      </div>
+      <div class="modal-body">
+        <div>
+          <span id="modal-category" class="card-category">Category</span>
+          <h2 id="modal-title" class="sidebar-title" style="margin-top: 4px;">Venue Title</h2>
+          <div style="display: flex; gap: 12px; margin-top: 8px; font-weight: 600;">
+            <span id="modal-rating" class="rating-pill">⭐ 5.0</span>
+            <span id="modal-price" style="color: var(--color-text-muted);">$$$</span>
+          </div>
+        </div>
+        <p id="modal-address" style="color: var(--color-text-secondary); font-size: 14px;">📍 Address</p>
+        <p id="modal-description" style="color: var(--color-text-secondary); line-height: 1.6;">Description text...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet GIS Mapping Core JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-  <!-- CityGO Modular JavaScript System Architecture (Strict Loading Order) -->
-  <script src="js/shop.js"></script>
-  <script src="js/map.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/app.js"></script>
+  <!-- Complete Architecture Application Scripts Wrapper -->
+  <script>
+    // ==========================================================================
+    // 1. DATABASE REPOSITORY MODULE
+    // ==========================================================================
+    const CITYGO_DATABASE = [
+      {
+        id: "v-001",
+        name: "Glitch Coffee & Roastery",
+        category: "CAFE",
+        rating: 4.9,
+        priceSymbol: "¥¥",
+        address: "3-16 Kanda Nishikicho, Chiyoda City, Tokyo",
+        lat: 35.6952,
+        lng: 139.7583,
+        emoji: "☕",
+        image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=600&q=80",
+        description: "Single-origin pour-overs crafted with artisanal precision in a warm, dark wood aesthetic space."
+      },
+      {
+        id: "v-002",
+        name: "Ichiran Ramen Shibuya",
+        category: "DINING",
+        rating: 4.8,
+        priceSymbol: "¥",
+        address: "1-22-7 Jinnan, Shibuya City, Tokyo",
+        lat: 35.6610,
+        lng: 139.7003,
+        emoji: "🍜",
+        image: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80",
+        description: "World-famous solo-booth tonkotsu ramen served with customized richness and handmade noodles."
+      },
+      {
+        id: "v-003",
+        name: "Bape Store Harajuku",
+        category: "SHOPPING",
+        rating: 4.7,
+        priceSymbol: "¥¥¥",
+        address: "4-21-5 Jingumae, Shibuya City, Tokyo",
+        lat: 35.6698,
+        lng: 139.7075,
+        emoji: "🛍️",
+        image: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=600&q=80",
+        description: "Flagship streetwear destination housing legendary urban fashion, sneakers, and Tokyo exclusives."
+      },
+      {
+        id: "v-004",
+        name: "teamLab Planets Tokyo",
+        category: "CULTURE",
+        rating: 4.9,
+        priceSymbol: "¥¥¥",
+        address: "6-1-16 Toyosu, Koto City, Tokyo",
+        lat: 35.6491,
+        lng: 139.7898,
+        emoji: "🎨",
+        image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80",
+        description: "Immersive body-on digital museum featuring water mirrors and infinite glowing flower rooms."
+      },
+      {
+        id: "v-005",
+        name: "Café de L'Ambre",
+        category: "CAFE",
+        rating: 4.6,
+        priceSymbol: "¥¥",
+        address: "8-10-15 Ginza, Chuo City, Tokyo",
+        lat: 35.6679,
+        lng: 139.7622,
+        emoji: "☕",
+        image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80",
+        description: "Historic 1948 kissaten serving rare aged coffee beans roasted in-house in central Ginza."
+      }
+    ];
 
+    // ==========================================================================
+    // 2. INTERACTIVE MAP ENGINE MODULE
+    // ==========================================================================
+    class CityGoMapEngine {
+      constructor(containerId, onSelectCallback) {
+        this.containerId = containerId;
+        this.onSelectCallback = onSelectCallback;
+        this.map = null;
+        this.markersMap = new Map();
+      }
+
+      init(center = [35.6762, 139.6503], zoom = 13) {
+        // Initialize Map
+        this.map = L.map(this.containerId, {
+          zoomControl: false
+        }).setView(center, zoom);
+
+        // Add Modern OpenStreetMap Vector Tiles
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap &copy; CARTO'
+        }).addTo(this.map);
+
+        // Re-align tiles after layout calculation
+        setTimeout(() => { this.map.invalidateSize(); }, 300);
+      }
+
+      renderMarkers(venues) {
+        // Clear existing markers
+        this.markersMap.forEach(marker => this.map.removeLayer(marker));
+        this.markersMap.clear();
+
+        venues.forEach(venue => {
+          const customIcon = L.divIcon({
+            className: 'bubbly-map-marker-wrap',
+            html: `
+              <div class="bubbly-map-marker" data-id="${venue.id}">
+                <div class="marker-pulse-ring"></div>
+                <div class="marker-inner-core">
+                  <span class="marker-emoji">${venue.emoji}</span>
+                </div>
+              </div>
+            `,
+            iconSize: [44, 44],
+            iconAnchor: [22, 22]
+          });
+
+          const marker = L.marker([venue.lat, venue.lng], { icon: customIcon }).addTo(this.map);
+
+          marker.bindPopup(`
+            <div class="luxury-popup-card">
+              <span class="card-category">${venue.category}</span>
+              <div class="popup-title">${venue.name}</div>
+              <div style="display:flex; justify-size: space-between; font-weight:700; font-size:12px;">
+                <span style="color:var(--color-accent-gold);">⭐ ${venue.rating}</span>
+                <span style="margin-left:auto; color:var(--color-text-muted);">${venue.priceSymbol}</span>
+              </div>
+            </div>
+          `);
+
+          marker.on('click', () => {
+            if (this.onSelectCallback) this.onSelectCallback(venue.id);
+          });
+
+          this.markersMap.set(venue.id, marker);
+        });
+      }
+
+      focusVenue(venue) {
+        this.map.flyTo([venue.lat, venue.lng], 15, { duration: 1.2 });
+        const marker = this.markersMap.get(venue.id);
+        if (marker) marker.openPopup();
+      }
+    }
+
+    // ==========================================================================
+    // 3. MAIN APPLICATION CONTROLLER
+    // ==========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentCategory = 'ALL';
+      let searchQuery = '';
+      let activeVenueId = null;
+
+      const cardListContainer = document.getElementById('shop-cards-list');
+      const venueCountEl = document.getElementById('venue-count');
+      const searchInput = document.getElementById('search-input');
+      const searchClearBtn = document.getElementById('search-clear-btn');
+      const modalOverlay = document.getElementById('venue-modal');
+      const modalCloseBtn = document.getElementById('modal-close-btn');
+
+      // Initialize Map Engine
+      const mapEngine = new CityGoMapEngine('map-viewport', (id) => selectVenue(id, false));
+      mapEngine.init();
+
+      // Filter & Render Pipeline
+      function getFilteredVenues() {
+        return CITYGO_DATABASE.filter(venue => {
+          const matchesCategory = (currentCategory === 'ALL' || venue.category === currentCategory);
+          const matchesSearch = venue.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                venue.address.toLowerCase().includes(searchQuery.toLowerCase());
+          return matchesCategory && matchesSearch;
+        });
+      }
+
+      function renderUI() {
+        const filtered = getFilteredVenues();
+        venueCountEl.textContent = filtered.length;
+
+        // Render Cards
+        cardListContainer.innerHTML = '';
+        if (filtered.length === 0) {
+          cardListContainer.innerHTML = `
+            <div style="text-align:center; padding: 40px 10px;">
+              <p style="font-size:32px;">🔍</p>
+              <h3 style="font-family:var(--font-heading); margin-top:8px;">No places found</h3>
+              <p style="font-size:13px; color:var(--color-text-muted);">Try resetting your filter tag or query.</p>
+            </div>
+          `;
+        } else {
+          filtered.forEach(venue => {
+            const card = document.createElement('div');
+            card.className = `bubbly-card ${venue.id === activeVenueId ? 'card-active' : ''}`;
+            card.innerHTML = `
+              <div class="card-image-wrap">
+                <img src="${venue.image}" alt="${venue.name}" />
+              </div>
+              <div class="card-content">
+                <div class="card-header-row">
+                  <span class="card-category">${venue.category}</span>
+                  <span class="rating-pill">⭐ ${venue.rating}</span>
+                </div>
+                <div class="card-title">${venue.name}</div>
+                <div class="card-address-subtle">📍 ${venue.address}</div>
+              </div>
+            `;
+            card.addEventListener('click', () => selectVenue(venue.id, true));
+            cardListContainer.appendChild(card);
+          });
+        }
+
+        // Render Markers
+        mapEngine.renderMarkers(filtered);
+      }
+
+      function selectVenue(id, flyTo = true) {
+        activeVenueId = id;
+        const venue = CITYGO_DATABASE.find(v => v.id === id);
+        if (!venue) return;
+
+        // Open Modal
+        document.getElementById('modal-img').src = venue.image;
+        document.getElementById('modal-category').textContent = venue.category;
+        document.getElementById('modal-title').textContent = venue.name;
+        document.getElementById('modal-rating').textContent = `⭐ ${venue.rating}`;
+        document.getElementById('modal-price').textContent = venue.priceSymbol;
+        document.getElementById('modal-address').textContent = `📍 ${venue.address}`;
+        document.getElementById('modal-description').textContent = venue.description;
+        modalOverlay.classList.add('active');
+
+        if (flyTo) mapEngine.focusVenue(venue);
+        renderUI();
+      }
+
+      // Filter Carousel Listeners
+      document.getElementById('filter-carousel').addEventListener('click', (e) => {
+        const btn = e.target.closest('.bubbly-tag');
+        if (!btn) return;
+        document.querySelectorAll('.bubbly-tag').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCategory = btn.dataset.category;
+        renderUI();
+      });
+
+      // Search Listeners
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.trim();
+        searchClearBtn.style.display = searchQuery ? 'flex' : 'none';
+        renderUI();
+      });
+
+      searchClearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        searchQuery = '';
+        searchClearBtn.style.display = 'none';
+        renderUI();
+      });
+
+      // Modal Close Listener
+      modalCloseBtn.addEventListener('click', () => {
+        modalOverlay.classList.remove('active');
+      });
+
+      modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) modalOverlay.classList.remove('active');
+      });
+
+      // First Render
+      renderUI();
+    });
+  </script>
 </body>
 </html>
