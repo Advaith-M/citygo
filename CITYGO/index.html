@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- 3rd Party Map Engine Styling -->
+  <!-- 3rd Party Map Engine Styling (MapLibre GL CSS) -->
   <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
 
   <!-- =========================================================================
@@ -234,22 +234,23 @@
   </div>
 
   <!-- =========================================================================
-       JAVASCRIPT MODULE LOADERS (Direct root references based on your setup)
+       JAVASCRIPT MODULE LOADERS & MAP ENGINE COMPATIBILITY BRIDGE
        ========================================================================= -->
   
-  <!-- 1. MapLibre GL Engine -->
+  <!-- 1. MapLibre GL Vector Engine Core -->
   <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 
-  <!-- 2. Data Store -->
+  <!-- 2. Global Compatibility Bridge (Ensures mapboxgl and maplibregl alias correctly) -->
+  <script>
+    if (typeof maplibregl !== 'undefined') {
+      window.mapboxgl = maplibregl;
+    }
+  </script>
+
+  <!-- 3. Local Application Scripts (Direct Root Folder References) -->
   <script src="shops.js"></script>
-
-  <!-- 3. Vector Map Engine -->
   <script src="map.js"></script>
-
-  <!-- 4. UI Handlers -->
   <script src="ui.js"></script>
-
-  <!-- 5. App Entry Point -->
   <script src="app.js"></script>
 
 </body>
