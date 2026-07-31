@@ -10,11 +10,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- 3rd Party Map Engine Styling (MapLibre GL CSS) -->
-  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+  <!-- 3rd Party Map Engine Styling (jsDelivr CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
 
   <!-- =========================================================================
-       CSS STYLESHEETS (Inside css/ subfolder)
+       MODULAR STYLESHEET ARCHITECTURE (Inside css/ subfolder)
        ========================================================================= -->
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
@@ -237,10 +237,10 @@
        JAVASCRIPT MODULE LOADERS & MAP ENGINE COMPATIBILITY BRIDGE
        ========================================================================= -->
   
-  <!-- 1. MapLibre GL Vector Engine Core -->
-  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+  <!-- 1. MapLibre GL Vector Engine Core (via jsDelivr CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 
-  <!-- 2. Global Compatibility Bridge (Ensures mapboxgl and maplibregl alias correctly) -->
+  <!-- 2. Global Compatibility Bridge (Guarantees app.js finds the map engine) -->
   <script>
     if (typeof maplibregl !== 'undefined') {
       window.mapboxgl = maplibregl;
