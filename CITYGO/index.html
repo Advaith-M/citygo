@@ -76,7 +76,7 @@
     }
 
     /* ==========================================================================
-       2. DULL WHITE & PURE BLACK TOP NAVIGATION BAR
+       2. DULL WHITE & PURE BLACK TOP NAVIGATION BAR WITH BRAND LOGO
        ========================================================================== */
     .app-topbar {
       height: 48px;
@@ -93,12 +93,16 @@
     .topbar-brand {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       font-family: var(--font-heading);
       font-weight: 800;
       font-size: 15px;
       color: #000000;
       letter-spacing: -0.3px;
+    }
+
+    .topbar-brand svg {
+      flex-shrink: 0;
     }
 
     .topbar-actions {
@@ -396,10 +400,16 @@
 
   <div class="app-viewport-wrapper">
     
-    <!-- Dull White & Pure Black Top Navigation Bar -->
+    <!-- Dull White & Pure Black Top Navigation Bar with Logo -->
     <header class="app-topbar">
       <div class="topbar-brand">
-        <span>📍</span> CityGO Live
+        <!-- Modern Glass Pin Brand Logo SVG -->
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="10" fill="#000000"/>
+          <path d="M16 6C11.5817 6 8 9.58172 8 14C8 19.5 16 26 16 26C16 26 24 19.5 24 14C24 9.58172 20.4183 6 16 6Z" stroke="#FFFFFF" stroke-width="2.2" stroke-linejoin="round"/>
+          <circle cx="16" cy="13" r="3" fill="#7C3AED"/>
+        </svg>
+        <span>CityGO Live</span>
       </div>
 
       <div class="topbar-actions">
@@ -497,7 +507,6 @@
     // Clean English Text Filter Helper
     function cleanToEnglishText(str, fallback) {
       if (!str) return fallback;
-      // Remove non-ASCII characters if dominant, fallback to clean translation tags
       const asciiOnly = str.replace(/[^\x00-\x7F]/g, "").trim();
       return asciiOnly.length > 2 ? asciiOnly : fallback;
     }
