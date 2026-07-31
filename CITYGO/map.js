@@ -147,7 +147,7 @@ const REAL_VENUES_DATABASE = [
     district: 'ny-manhattan',
     name: 'Katz’s Delicatessen',
     category: 'DINING',
-    subcategory: 'Historic Jewish Deli & Pastrami',
+   subcategory: 'Historic Jewish Deli & Pastrami',
     emoji: '🥪',
     coords: [-73.9872, 40.7222],
     rating: 4.7,
@@ -161,8 +161,7 @@ const REAL_VENUES_DATABASE = [
     district: 'ny-manhattan',
     name: 'Devoción Specialty Coffee',
     category: 'CAFE',
-    subcategory: 'Farm-to-Table Colombian Roastery',
-    emoji: '☕',
+    subcategory: 'Farm-to-Table Colombian Roastery',   emoji: '☕',
     coords: [-73.9880, 40.7405],
     rating: 4.8,
     reviews: 1120,
@@ -221,8 +220,7 @@ const REAL_VENUES_DATABASE = [
    ========================================================================== */
 
 class CityGoEngine {
-  constructor(containerId) {
-    this.containerId = containerId || 'map-viewport';
+  constructor() {
     this.map = null;
     this.currentTheme = 'light';
     this.currentDistrictKey = 'tokyo-shibuya';
@@ -279,48 +277,15 @@ class CityGoEngine {
      3. INITIALIZATION & MAP SETUP
      ========================================================================== */
 
-  init(center, zoom) {
-    // If map is already instantiated, re-center/zoom if parameters are passed
-    if (this.map) {
-      if (center) {
-        let targetCenter = center;
-        if (Array.isArray(center) && center.length === 2) {
-          if (Math.abs(center[0]) <= 90 && Math.abs(center[0]) > Math.abs(center[1])) {
-            targetCenter = [center[1], center[0]]; // Flip [lat, lng] to [lng, lat]
-          }
-        }
-        this.map.setCenter(targetCenter);
-      }
-      if (zoom) this.map.setZoom(zoom);
-      return;
-    }
-
+  init() {
     const defaultDistrict = DISTRICT_PRESETS[this.currentDistrictKey];
 
-    let initialCenter = defaultDistrict.center;
-    if (Array.isArray(center) && center.length === 2) {
-      if (Math.abs(center[0]) <= 90 && Math.abs(center[0]) > Math.abs(center[1])) {
-        initialCenter = [center[1], center[0]];
-      } else {
-        initialCenter = center;
-      }
-    }
-
-    const initialZoom = zoom || defaultDistrict.zoom;
-
-    // Fallback engine check for MapLibre or Mapbox
-    const Engine = window.maplibregl || window.mapboxgl;
-    if (!Engine) {
-      console.error("Map engine binary missing.");
-      return;
-    }
-
     // Initialize MapLibre GL JS Instance
-    this.map = new Engine.Map({
-      container: this.containerId || 'map-viewport',
+    this.map = new maplibregl.Map({
+      container: 'map-viewport',
       style: MAP_STYLES[this.currentTheme],
-      center: initialCenter,
-      zoom: initialZoom,
+      center: defaultDistrict.center,
+      zoom: defaultDistrict.zoom,
       pitch: defaultDistrict.pitch,
       bearing: defaultDistrict.bearing,
       antialias: true,
@@ -329,7 +294,7 @@ class CityGoEngine {
     });
 
     // Add Native Controls
-    this.map.addControl(new Engine.NavigationControl({ showCompass: true }), 'bottom-right');
+    this.map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'bottom-right');
 
     // Register Map Event Listeners
     this.map.on('load', () => this.onMapLoaded());
@@ -357,12 +322,10 @@ class CityGoEngine {
     const layers = this.map.getStyle().layers;
     let labelLayerId;
     
-    if (layers) {
-      for (let i = 0; i < layers.length; i++) {
-        if (layers[i].type === 'symbol' && layers[i].layout && layers[i].layout['text-field']) {
-          labelLayerId = layers[i].id;
-          break;
-        }
+    for (let i = 0; i < layers.length; i++) {
+      if (layers[i].type === 'symbol' && layers[i].layout && layers[i].layout['text-field']) {
+        labelLayerId = layers[i].id;
+        break;
       }
     }
 
@@ -437,9 +400,7 @@ class CityGoEngine {
     const venues = this.getFilteredVenues();
 
     // Update Counts in UI
-    if (this.dom.venueCountText) this.dom.venueCountText.innerText = venues.length;
-    if (!this.dom.shopCardsList) return;
-
+    this.dom.venueCountText.innerText = venues.length;
     this.dom.shopCardsList.innerHTML = '';
 
     if (venues.length === 0) {
@@ -453,8 +414,6 @@ class CityGoEngine {
       return;
     }
 
-    const Engine = window.maplibregl || window.mapboxgl;
-
     venues.forEach(venue => {
       // 1. Create Custom DOM Marker Element
       const markerEl = document.createElement('div');
@@ -466,14 +425,12 @@ class CityGoEngine {
         this.selectVenue(venue);
       });
 
-      // 2. Instantiate Marker
-      if (Engine) {
-        const marker = new Engine.Marker({ element: markerEl })
-          .setLngLat(venue.coords)
-          .addTo(this.map);
+      // 2. Instantiate MapLibre Marker
+      const marker = new maplibregl.Marker({ element: markerEl })
+        .setLngLat(venue.coords)
+        .addTo(this.map);
 
-        this.markersMap.set(venue.id, marker);
-      }
+      this.markersMap.set(venue.id, marker);
 
       // 3. Render Card in Sidebar Feed
       const cardEl = document.createElement('article');
@@ -514,19 +471,17 @@ class CityGoEngine {
     });
 
     // Populate Modal Drawer Content
-    if (this.dom.modalIcon) this.dom.modalIcon.innerText = venue.emoji;
-    if (this.dom.modalCategory) this.dom.modalCategory.innerText = venue.category;
-    if (this.dom.modalTitle) this.dom.modalTitle.innerText = venue.name;
-    if (this.dom.modalSubtitle) this.dom.modalSubtitle.innerText = venue.subcategory;
-    if (this.dom.modalAddress) this.dom.modalAddress.innerText = venue.address;
-    if (this.dom.modalHours) {
-      this.dom.modalHours.innerText = `${venue.openNow ? 'Open Now' : 'Closed'} (${venue.hours})`;
-      this.dom.modalHours.className = `tile-val ${venue.openNow ? 'text-success' : ''}`;
-    }
-    if (this.dom.modalRating) this.dom.modalRating.innerText = `⭐ ${venue.rating} / 5.0 (${venue.reviews} user reviews)`;
+    this.dom.modalIcon.innerText = venue.emoji;
+    this.dom.modalCategory.innerText = venue.category;
+    this.dom.modalTitle.innerText = venue.name;
+    this.dom.modalSubtitle.innerText = venue.subcategory;
+    this.dom.modalAddress.innerText = venue.address;
+    this.dom.modalHours.innerText = `${venue.openNow ? 'Open Now' : 'Closed'} (${venue.hours})`;
+    this.dom.modalHours.className = `tile-val ${venue.openNow ? 'text-success' : ''}`;
+    this.dom.modalRating.innerText = `⭐ ${venue.rating} / 5.0 (${venue.reviews} user reviews)`;
 
     // Open Modal
-    if (this.dom.venueModal) this.dom.venueModal.classList.add('active');
+    this.dom.venueModal.classList.add('active');
   }
 
   /* ==========================================================================
@@ -535,141 +490,113 @@ class CityGoEngine {
 
   bindUIEvents() {
     // District Selector Dropdown
-    if (this.dom.districtSelect) {
-      this.dom.districtSelect.addEventListener('change', (e) => {
-        this.currentDistrictKey = e.target.value;
-        const preset = DISTRICT_PRESETS[this.currentDistrictKey];
-        if (preset) {
-          this.flyToLocation(preset.center, preset.zoom, preset.pitch, preset.bearing);
-          this.renderVenuesForCurrentDistrict();
-        }
-      });
-    }
+    this.dom.districtSelect.addEventListener('change', (e) => {
+      this.currentDistrictKey = e.target.value;
+      const preset = DISTRICT_PRESETS[this.currentDistrictKey];
+      if (preset) {
+        this.flyToLocation(preset.center, preset.zoom, preset.pitch, preset.bearing);
+        this.renderVenuesForCurrentDistrict();
+      }
+    });
 
     // Sidebar Collapse Toggle
-    if (this.dom.sidebarCollapseBtn && this.dom.sidebarPanel) {
-      this.dom.sidebarCollapseBtn.addEventListener('click', () => {
-        this.dom.sidebarPanel.classList.toggle('collapsed');
-        this.dom.sidebarCollapseBtn.innerText = this.dom.sidebarPanel.classList.contains('collapsed') ? '▶' : '◀';
-        setTimeout(() => this.map && this.map.resize(), 300);
-      });
-    }
+    this.dom.sidebarCollapseBtn.addEventListener('click', () => {
+      this.dom.sidebarPanel.classList.toggle('collapsed');
+      this.dom.sidebarCollapseBtn.innerText = this.dom.sidebarPanel.classList.contains('collapsed') ? '▶' : '◀';
+      setTimeout(() => this.map.resize(), 300);
+    });
 
     // Search Input
-    if (this.dom.searchInput && this.dom.searchClearBtn) {
-      this.dom.searchInput.addEventListener('input', (e) => {
-        this.searchQuery = e.target.value;
-        this.dom.searchClearBtn.hidden = this.searchQuery.length === 0;
-        this.renderVenuesForCurrentDistrict();
-      });
+    this.dom.searchInput.addEventListener('input', (e) => {
+      this.searchQuery = e.target.value;
+      this.dom.searchClearBtn.hidden = this.searchQuery.length === 0;
+      this.renderVenuesForCurrentDistrict();
+    });
 
-      this.dom.searchClearBtn.addEventListener('click', () => {
-        this.dom.searchInput.value = '';
-        this.searchQuery = '';
-        this.dom.searchClearBtn.hidden = true;
-        this.renderVenuesForCurrentDistrict();
-      });
-    }
+    this.dom.searchClearBtn.addEventListener('click', () => {
+      this.dom.searchInput.value = '';
+      this.searchQuery = '';
+      this.dom.searchClearBtn.hidden = true;
+      this.renderVenuesForCurrentDistrict();
+    });
 
     // Filter Chips Row
-    if (this.dom.filterChipsContainer) {
-      this.dom.filterChipsContainer.addEventListener('click', (e) => {
-        const target = e.target.closest('.chip-btn');
-        if (!target) return;
+    this.dom.filterChipsContainer.addEventListener('click', (e) => {
+      const target = e.target.closest('.chip-btn');
+      if (!target) return;
 
-        this.dom.filterChipsContainer.querySelectorAll('.chip-btn').forEach(btn => btn.classList.remove('active'));
-        target.classList.add('active');
+      this.dom.filterChipsContainer.querySelectorAll('.chip-btn').forEach(btn => btn.classList.remove('active'));
+      target.classList.add('active');
 
-        this.activeCategory = target.dataset.category || 'ALL';
-        this.renderVenuesForCurrentDistrict();
-      });
-    }
+      this.activeCategory = target.dataset.category || 'ALL';
+      this.renderVenuesForCurrentDistrict();
+    });
 
     // Open Now Checkbox & Sort Dropdown
-    if (this.dom.openNowCheckbox) {
-      this.dom.openNowCheckbox.addEventListener('change', (e) => {
-        this.openNowOnly = e.target.checked;
-        this.renderVenuesForCurrentDistrict();
-      });
-    }
+    this.dom.openNowCheckbox.addEventListener('change', (e) => {
+      this.openNowOnly = e.target.checked;
+      this.renderVenuesForCurrentDistrict();
+    });
 
-    if (this.dom.sortDropdown) {
-      this.dom.sortDropdown.addEventListener('change', (e) => {
-        this.sortBy = e.target.value;
-        this.renderVenuesForCurrentDistrict();
-      });
-    }
+    this.dom.sortDropdown.addEventListener('change', (e) => {
+      this.sortBy = e.target.value;
+      this.renderVenuesForCurrentDistrict();
+    });
 
     // Top Bar Control Buttons
-    if (this.dom.btn3D) {
-      this.dom.btn3D.addEventListener('click', () => {
-        this.is3DEnabled = !this.is3DEnabled;
-        this.dom.btn3D.classList.toggle('active', this.is3DEnabled);
-        if (this.map) {
-          this.map.easeTo({
-            pitch: this.is3DEnabled ? 55 : 0,
-            duration: 800
-          });
-        }
+    this.dom.btn3D.addEventListener('click', () => {
+      this.is3DEnabled = !this.is3DEnabled;
+      this.dom.btn3D.classList.toggle('active', this.is3DEnabled);
+      this.map.easeTo({
+        pitch: this.is3DEnabled ? 55 : 0,
+        duration: 800
       });
-    }
+    });
 
-    if (this.dom.btnSatellite) {
-      this.dom.btnSatellite.addEventListener('click', () => {
-        const isSatellite = this.currentTheme === 'satellite';
-        this.currentTheme = isSatellite ? 'light' : 'satellite';
-        if (this.map) this.map.setStyle(MAP_STYLES[this.currentTheme]);
-        this.dom.btnSatellite.classList.toggle('active', !isSatellite);
-      });
-    }
+    this.dom.btnSatellite.addEventListener('click', () => {
+      const isSatellite = this.currentTheme === 'satellite';
+      this.currentTheme = isSatellite ? 'light' : 'satellite';
+      this.map.setStyle(MAP_STYLES[this.currentTheme]);
+      this.dom.btnSatellite.classList.toggle('active', !isSatellite);
+    });
 
-    if (this.dom.btnRecenter) {
-      this.dom.btnRecenter.addEventListener('click', () => {
-        const preset = DISTRICT_PRESETS[this.currentDistrictKey];
-        if (preset) {
-          this.flyToLocation(preset.center, preset.zoom, preset.pitch, preset.bearing);
-        }
-      });
-    }
+    this.dom.btnRecenter.addEventListener('click', () => {
+      const preset = DISTRICT_PRESETS[this.currentDistrictKey];
+      if (preset) {
+        this.flyToLocation(preset.center, preset.zoom, preset.pitch, preset.bearing);
+      }
+    });
 
-    if (this.dom.btnRadar) {
-      this.dom.btnRadar.addEventListener('click', () => {
-        this.showMapStatus('Scanning District POIs...');
-        if (this.map) this.map.rotateTo(this.map.getBearing() + 90, { duration: 1500 });
-        setTimeout(() => this.hideMapStatus(), 1600);
-      });
-    }
+    this.dom.btnRadar.addEventListener('click', () => {
+      this.showMapStatus('Scanning District POIs...');
+      this.map.rotateTo(this.map.getBearing() + 90, { duration: 1500 });
+      setTimeout(() => this.hideMapStatus(), 1600);
+    });
 
     // Theme Switcher (Top Right)
-    if (this.dom.themeToggleBtn) {
-      this.dom.themeToggleBtn.addEventListener('click', () => {
-        this.currentTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
-        if (this.map) this.map.setStyle(MAP_STYLES[this.currentTheme]);
-      });
-    }
+    this.dom.themeToggleBtn.addEventListener('click', () => {
+      this.currentTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
+      this.map.setStyle(MAP_STYLES[this.currentTheme]);
+    });
 
     // Modal Close Button & Backdrop
-    if (this.dom.modalCloseBtn && this.dom.venueModal) {
-      this.dom.modalCloseBtn.addEventListener('click', () => {
-        this.dom.venueModal.classList.remove('active');
-      });
+    this.dom.modalCloseBtn.addEventListener('click', () => {
+      this.dom.venueModal.classList.remove('active');
+    });
 
-      this.dom.venueModal.addEventListener('click', (e) => {
-        if (e.target === this.dom.venueModal) {
-          this.dom.venueModal.classList.remove('active');
-        }
-      });
-    }
+    this.dom.venueModal.addEventListener('click', (e) => {
+      if (e.target === this.dom.venueModal) {
+        this.dom.venueModal.classList.remove('active');
+      }
+    });
 
     // Directions Button Action
-    if (this.dom.btnDirections) {
-      this.dom.btnDirections.addEventListener('click', () => {
-        if (this.activeVenue) {
-          const [lng, lat] = this.activeVenue.coords;
-          window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
-        }
-      });
-    }
+    this.dom.btnDirections.addEventListener('click', () => {
+      if (this.activeVenue) {
+        const [lng, lat] = this.activeVenue.coords;
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
+      }
+    });
   }
 
   /* ==========================================================================
@@ -677,7 +604,6 @@ class CityGoEngine {
      ========================================================================== */
 
   flyToLocation(center, zoom = 16.5, pitch = 45, bearing = 0) {
-    if (!this.map) return;
     this.map.flyTo({
       center: center,
       zoom: zoom,
@@ -697,42 +623,26 @@ class CityGoEngine {
     const bearing = Math.round(this.map.getBearing());
 
     // Update Coordinates Telemetry
-    if (this.dom.telemetryCoords) {
-      const latStr = `${Math.abs(center.lat).toFixed(4)}° ${center.lat >= 0 ? 'N' : 'S'}`;
-      const lngStr = `${Math.abs(center.lng).toFixed(4)}° ${center.lng >= 0 ? 'E' : 'W'}`;
-      this.dom.telemetryCoords.innerText = `${latStr}, ${lngStr}`;
-    }
+    const latStr = `${Math.abs(center.lat).toFixed(4)}° ${center.lat >= 0 ? 'N' : 'S'}`;
+    const lngStr = `${Math.abs(center.lng).toFixed(4)}° ${center.lng >= 0 ? 'E' : 'W'}`;
+    this.dom.telemetryCoords.innerText = `${latStr}, ${lngStr}`;
 
     // Update Bottom Right HUD Cards
-    if (this.dom.hudZoomVal) this.dom.hudZoomVal.innerText = zoom;
-    if (this.dom.hudPitchVal) this.dom.hudPitchVal.innerText = `${bearing}° / ${pitch}°`;
+    this.dom.hudZoomVal.innerText = zoom;
+    this.dom.hudPitchVal.innerText = `${bearing}° / ${pitch}°`;
   }
 
   showMapStatus(message) {
-    if (!this.dom.mapStatusPill) return;
-    const statusText = this.dom.mapStatusPill.querySelector('span:last-child');
-    if (statusText) statusText.innerText = message;
+    this.dom.mapStatusPill.querySelector('span:last-child').innerText = message;
     this.dom.mapStatusPill.style.display = 'flex';
   }
 
   hideMapStatus() {
-    if (this.dom.mapStatusPill) {
-      this.dom.mapStatusPill.style.display = 'none';
-    }
+    this.dom.mapStatusPill.style.display = 'none';
   }
 }
 
-/* ==========================================================================
-   8. GLOBAL EXPORTS & INITIALIZATION
-   ========================================================================== */
-
-// Expose Engine globally so app.js can detect it
-window.CityGoEngine = CityGoEngine;
-window.CityGoMapEngine = CityGoEngine;
-
-// Instantiate Engine when DOM Ready if not already created
+// Instantiate Engine when DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
-  if (!window.cityGoApp) {
-    window.cityGoApp = new CityGoEngine();
-  }
+  window.cityGoApp = new CityGoEngine();
 });
