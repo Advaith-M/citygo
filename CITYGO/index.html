@@ -14,7 +14,7 @@
   <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
 
   <!-- =========================================================================
-       MODULAR STYLESHEET ARCHITECTURE (Linked via css/ folder)
+       CSS STYLESHEETS (Inside css/ subfolder)
        ========================================================================= -->
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
@@ -234,23 +234,23 @@
   </div>
 
   <!-- =========================================================================
-       JAVASCRIPT MODULE LOADERS (In Strict Dependency Order)
+       JAVASCRIPT MODULE LOADERS (Direct root references based on your setup)
        ========================================================================= -->
   
-  <!-- 1. MapLibre GL Vector Engine Core -->
+  <!-- 1. MapLibre GL Engine -->
   <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 
-  <!-- 2. Data Store Module -->
-  <script src="js/shops.js"></script>
+  <!-- 2. Data Store -->
+  <script src="shops.js"></script>
 
-  <!-- 3. GIS Vector Render Logic -->
-  <script src="js/map.js"></script>
+  <!-- 3. Vector Map Engine -->
+  <script src="map.js"></script>
 
-  <!-- 4. UI Interactions & Event Handlers -->
-  <script src="js/ui.js"></script>
+  <!-- 4. UI Handlers -->
+  <script src="ui.js"></script>
 
-  <!-- 5. Master App Initializer -->
-  <script src="js/app.js"></script>
+  <!-- 5. App Entry Point -->
+  <script src="app.js"></script>
 
 </body>
 </html>
