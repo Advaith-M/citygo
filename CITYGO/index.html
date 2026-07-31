@@ -76,10 +76,10 @@
     }
 
     /* ==========================================================================
-       2. TOP NAVIGATION BAR (NO LOGO, SLIGHTLY BIGGER/TALLER)
+       2. TOP NAVIGATION BAR
        ========================================================================== */
     .app-topbar {
-      height: 56px; /* Increased height */
+      height: 56px;
       background-color: var(--color-bg-topbar);
       border-bottom: var(--border-light);
       display: flex;
@@ -92,7 +92,7 @@
     .topbar-brand {
       font-family: var(--font-heading);
       font-weight: 800;
-      font-size: 18px; /* Taller font focus */
+      font-size: 18px;
       color: #000000;
       letter-spacing: -0.3px;
     }
@@ -285,7 +285,7 @@
     }
 
     /* ==========================================================================
-       4. MAP VIEWPORT & FLOATING CURVED BAR
+       4. MAP VIEWPORT & ENLARGED FLOATING BAR
        ========================================================================== */
     .map-container {
       flex: 1;
@@ -298,28 +298,29 @@
       height: 100%;
     }
 
-    /* Hanging Floating Curved Bar (Centered at Top of Map) */
+    /* Hanging Floating Curved Bar */
     .floating-top-bar {
       position: absolute;
-      top: 12px;
+      top: 14px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 500;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(203, 213, 225, 0.8);
-      border-radius: var(--radius-pill); /* Pill/Curved shape */
-      padding: 4px 8px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(203, 213, 225, 0.9);
+      border-radius: var(--radius-pill);
+      padding: 6px 10px;
       display: flex;
       align-items: center;
-      gap: 4px;
-      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.12);
+      gap: 6px;
+      box-shadow: 0 6px 24px rgba(15, 23, 42, 0.14);
     }
 
+    /* Enlarged Buttons */
     .floating-btn {
-      width: 30px; /* Small, compact dimensions */
-      height: 30px;
+      width: 38px;  /* Increased size */
+      height: 38px; /* Increased size */
       border-radius: 50%;
       background: transparent;
       border: none;
@@ -336,9 +337,10 @@
       transform: scale(1.08);
     }
 
+    /* Enlarged Icon Dimensions */
     .floating-btn svg {
-      width: 15px;
-      height: 15px;
+      width: 18px;  /* Increased icon size */
+      height: 18px; /* Increased icon size */
       stroke: #000000;
       fill: none;
       stroke-width: 2;
@@ -348,7 +350,7 @@
 
     .map-status-pill {
       position: absolute;
-      top: 54px;
+      top: 64px;
       right: 14px;
       background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(8px);
@@ -404,7 +406,7 @@
 
   <div class="app-viewport-wrapper">
     
-    <!-- Taller, Clean Top Navigation Bar -->
+    <!-- Top Navigation Bar -->
     <header class="app-topbar">
       <div class="topbar-brand">
         CityGO Live
@@ -444,7 +446,7 @@
       <!-- Map Viewport -->
       <main class="map-container">
 
-        <!-- Hanging Floating Curved Bar (Top-Center of Map) -->
+        <!-- Hanging Floating Curved Bar with Enlarged Buttons -->
         <div class="floating-top-bar">
           <!-- CHAT -->
           <button class="floating-btn" title="Chat">
