@@ -3,17 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>CityGO — Next-Gen Urban Explorer</title>
+  <title>CityGO — Next-Gen Urban GIS Explorer</title>
 
-  <!-- Primary Fonts System -->
+  <!-- Typography Engine (Google Fonts) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- MapLibre Vector Map Engine CSS (GMaps/Apple Maps grade vector rendering) -->
+  <!-- 3rd Party Vector Map Engine CSS -->
   <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
 
-  <!-- Main Modular Stylesheet -->
+  <!-- =========================================================================
+       MODULAR STYLESHEET ARCHITECTURE (Loaded in Cascade Order)
+       ========================================================================= -->
+  <link rel="stylesheet" href="main.css" />
+  <link rel="stylesheet" href="components.css" />
+  <link rel="stylesheet" href="luxury-components.css" />
   <link rel="stylesheet" href="map.css" />
 </head>
 <body>
@@ -21,16 +26,16 @@
   <div class="app-viewport-wrapper">
     
     <!-- =========================================================================
-         TOP NAVIGATION BAR
+         HIGH-TECH TOP NAVIGATION BAR
          ========================================================================= -->
-    <header class="app-topbar">
+    <header class="app-topbar luxury-topbar">
       <div class="topbar-left">
         <div class="brand-badge">
           <span class="brand-pulse-dot"></span>
-          <span class="brand-name">CityGO <small class="brand-tag">VECTOR LIVE</small></span>
+          <span class="brand-name">CityGO <small class="brand-tag">PRO VECTOR</small></span>
         </div>
 
-        <div class="district-quick-selector">
+        <div class="district-quick-selector luxury-dropdown">
           <span class="location-pin-icon">📍</span>
           <select id="district-dropdown" class="district-select" aria-label="Select Target District">
             <option value="tokyo-shibuya">Shibuya & Harajuku, Tokyo</option>
@@ -44,7 +49,7 @@
       </div>
 
       <div class="topbar-center-info">
-        <div class="telemetry-pill">
+        <div class="telemetry-pill luxury-pill">
           <span class="telemetry-label">GPS:</span>
           <span id="telemetry-coords" class="telemetry-value">35.6580° N, 139.7016° E</span>
         </div>
@@ -53,9 +58,9 @@
       <div class="topbar-right">
         <div class="status-indicator online">
           <span class="status-dot"></span>
-          <span class="status-text">Vector Engine Active</span>
+          <span class="status-text">GIS Vector Stream Active</span>
         </div>
-        <button id="theme-toggle-btn" class="icon-tool-btn" title="Toggle Map Theme">
+        <button id="theme-toggle-btn" class="icon-tool-btn luxury-icon-btn" title="Toggle Map Theme">
           <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
       </div>
@@ -66,25 +71,25 @@
          ========================================================================= -->
     <div class="app-main-layout">
       
-      <!-- COMPACT SIDEBAR PANEL (320px) -->
-      <aside class="compact-sidebar" id="sidebar-panel">
+      <!-- COMPACT SIDEBAR PANEL -->
+      <aside class="compact-sidebar luxury-sidebar" id="sidebar-panel">
         
         <header class="sidebar-header">
           <div class="sidebar-title-row">
-            <h1 class="sidebar-title">Explore Real Venues</h1>
+            <h1 class="sidebar-title">Real-World Venues</h1>
             <button id="sidebar-collapse-btn" class="sidebar-toggle-btn" title="Collapse Sidebar">◀</button>
           </div>
 
-          <!-- Real-Time Search Bar -->
-          <div class="search-input-wrapper">
+          <!-- Real-Time Search Bar Component -->
+          <div class="search-input-wrapper luxury-search">
             <span class="search-icon">🔍</span>
-            <input type="text" id="search-input" class="search-input" placeholder="Search cafes, shops, dining, landmarks..." />
+            <input type="text" id="search-input" class="search-input" placeholder="Search shops, cafes, dining, spots..." />
             <button id="search-clear-btn" class="search-clear-btn" hidden>✕</button>
           </div>
         </header>
 
-        <!-- Category Quick-Filter Chips -->
-        <nav class="filter-chips-row" id="filter-chips">
+        <!-- Category Filter Chips -->
+        <nav class="filter-chips-row luxury-chips" id="filter-chips">
           <button class="chip-btn active" data-category="ALL">✨ All Spots</button>
           <button class="chip-btn" data-category="CAFE">☕ Cafes</button>
           <button class="chip-btn" data-category="DINING">🍜 Dining</button>
@@ -93,7 +98,7 @@
           <button class="chip-btn" data-category="CULTURE">🎨 Culture</button>
         </nav>
 
-        <!-- Quick Filters & Sort Bar -->
+        <!-- Sub-Filters & Controls Bar -->
         <div class="sub-filter-bar">
           <label class="toggle-checkbox-label">
             <input type="checkbox" id="open-now-checkbox" />
@@ -101,26 +106,26 @@
           </label>
           <select id="sort-dropdown" class="sub-sort-select">
             <option value="popular">🔥 Most Popular</option>
-            <option value="distance">📍 Nearest to Center</option>
+            <option value="distance">📍 Nearest Spot</option>
             <option value="rating">⭐ Top Rated</option>
           </select>
         </div>
 
-        <!-- Venue Count & Sync Status -->
+        <!-- Venue Stats Bar -->
         <div class="stats-bar">
           <span><strong id="venue-count">0</strong> verified places in view</span>
-          <span id="data-source-tag" class="source-tag">OSM Vector Live</span>
+          <span id="data-source-tag" class="source-tag">OSM Live Vector</span>
         </div>
 
-        <!-- Live Venue Feed List -->
+        <!-- Live Venue Feed Cards List -->
         <div class="shop-cards-list" id="shop-cards-list">
-          <!-- Populated dynamically by map.js -->
+          <!-- Populated dynamically via shops.js + ui.js -->
         </div>
 
         <!-- Sidebar Footer Status -->
         <footer class="sidebar-footer">
-          <span>CityGO GIS Engine v4.2</span>
-          <span class="pulse-text">● Live Sync</span>
+          <span>CityGO GIS Engine v4.8</span>
+          <span class="pulse-text">● Live Telemetry</span>
         </footer>
       </aside>
 
@@ -129,66 +134,59 @@
            ========================================================================= -->
       <main class="map-container">
 
-        <!-- FLOATING CURVED CONTROL CAPSULE (Centered Top of Map) -->
-        <div class="floating-top-bar">
-          <!-- CHAT / AI EXPLORER -->
-          <button class="floating-btn" id="btn-chat" title="AI Urban Assistant">
+        <!-- FLOATING CURVED CONTROL CAPSULE -->
+        <div class="floating-top-bar luxury-capsule">
+          <button class="floating-btn" id="btn-chat" title="AI Urban Concierge">
             <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </button>
           
-          <!-- USER PROFILE & SAVED SPOTS -->
           <button class="floating-btn" id="btn-account" title="Saved Places & Favorites">
             <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </button>
           
-          <!-- HOTLINE / CONCIERGE -->
-          <button class="floating-btn" id="btn-call" title="Local Concierge">
+          <button class="floating-btn" id="btn-call" title="Local Hotline">
             <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
           </button>
           
           <div class="bar-divider"></div>
 
-          <!-- DISTRICT SCANNER RADAR -->
           <button class="floating-btn" id="btn-radar" title="Scan Area POIs">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 6a6 6 0 0 1 6 6"/><circle cx="12" cy="12" r="2"/></svg>
           </button>
 
-          <!-- 3D BUILDINGS & TILT TOGGLE -->
-          <button class="floating-btn" id="btn-3d-toggle" title="Toggle 3D Vector Buildings">
+          <button class="floating-btn active" id="btn-3d-toggle" title="Toggle 3D Vector Buildings">
             <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
           </button>
 
-          <!-- SATELLITE / VECTOR HYBRID TOGGLE -->
           <button class="floating-btn" id="btn-satellite-toggle" title="Toggle Satellite Hybrid">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8M3.6 15h16.8"/><path d="M11.5 3a17 17 0 0 0 0 18M12.5 3a17 17 0 0 1 0 18"/></svg>
           </button>
 
           <div class="bar-divider"></div>
 
-          <!-- RE-CENTER GPS LOCATION -->
-          <button class="floating-btn highlight" id="btn-recenter" title="Recenter My Location">
+          <button class="floating-btn highlight" id="btn-recenter" title="Recenter Location">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
           </button>
         </div>
 
-        <!-- Floating Map Overlay HUDs -->
-        <div id="map-status" class="map-status-pill">
+        <!-- Dynamic Map Telemetry Overlays -->
+        <div id="map-status" class="map-status-pill luxury-pill">
           <span class="spinner"></span>
-          <span>Fetching Real-World Venues...</span>
+          <span>Loading Spatial Datasets...</span>
         </div>
 
         <div class="map-hud-bottom-right">
-          <div class="hud-card">
+          <div class="hud-card luxury-hud">
             <span class="hud-label">ZOOM LEVEL</span>
             <span id="hud-zoom-val" class="hud-value">16.5</span>
           </div>
-          <div class="hud-card">
+          <div class="hud-card luxury-hud">
             <span class="hud-label">BEARING / PITCH</span>
             <span id="hud-pitch-val" class="hud-value">0° / 45°</span>
           </div>
         </div>
 
-        <!-- The MapLibre Canvas Container -->
+        <!-- Map Canvas Viewport -->
         <div id="map-viewport" class="map-canvas"></div>
       </main>
 
@@ -196,13 +194,13 @@
   </div>
 
   <!-- =========================================================================
-       FLOATING DETAIL DRAWER / VENUE MODAL
+       LUXURY VENUE DETAIL MODAL / DRAWER
        ========================================================================= -->
   <div class="modal-overlay" id="venue-modal">
-    <div class="modal-panel">
+    <div class="modal-panel luxury-modal">
       <button id="modal-close" class="modal-close-btn" title="Close Panel">✕</button>
 
-      <div class="venue-hero-banner">
+      <div class="venue-hero-banner luxury-banner">
         <div id="modal-icon" class="venue-hero-emoji">📍</div>
         <div class="venue-hero-badge" id="modal-category">CATEGORY</div>
       </div>
@@ -212,7 +210,7 @@
         <p id="modal-subtitle" class="venue-modal-subtitle">Sub-category & Local Tags</p>
 
         <div class="modal-info-grid">
-          <div class="info-tile">
+          <div class="info-tile luxury-tile">
             <span class="tile-icon">📍</span>
             <div class="tile-text">
               <span class="tile-label">Address</span>
@@ -220,7 +218,7 @@
             </div>
           </div>
 
-          <div class="info-tile">
+          <div class="info-tile luxury-tile">
             <span class="tile-icon">🕒</span>
             <div class="tile-text">
               <span class="tile-label">Hours</span>
@@ -228,7 +226,7 @@
             </div>
           </div>
 
-          <div class="info-tile">
+          <div class="info-tile luxury-tile">
             <span class="tile-icon">⭐</span>
             <div class="tile-text">
               <span class="tile-label">Rating</span>
@@ -238,10 +236,10 @@
         </div>
 
         <div class="modal-action-buttons">
-          <button id="btn-directions" class="action-btn primary">
+          <button id="btn-directions" class="action-btn primary luxury-btn-primary">
             <span>🧭 Get Directions</span>
           </button>
-          <button id="btn-bookmark" class="action-btn secondary">
+          <button id="btn-bookmark" class="action-btn secondary luxury-btn-secondary">
             <span>⭐ Bookmark</span>
           </button>
         </div>
@@ -249,10 +247,24 @@
     </div>
   </div>
 
-  <!-- MapLibre Vector Map Engine Script -->
+  <!-- =========================================================================
+       JAVASCRIPT MODULE LOADERS (In Strict Dependency Order)
+       ========================================================================= -->
+  
+  <!-- 1. Engine Core Dependency -->
   <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 
-  <!-- External JavaScript logic file -->
+  <!-- 2. Data Source Module -->
+  <script src="shops.js"></script>
+
+  <!-- 3. GIS Vector Render Engine -->
   <script src="map.js"></script>
+
+  <!-- 4. UI Interaction & Component Handlers -->
+  <script src="ui.js"></script>
+
+  <!-- 5. Main Application Initialization Engine -->
+  <script src="app.js"></script>
+
 </body>
 </html>
