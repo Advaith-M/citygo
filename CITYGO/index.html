@@ -76,69 +76,25 @@
     }
 
     /* ==========================================================================
-       2. DULL WHITE & PURE BLACK TOP NAVIGATION BAR WITH BRAND LOGO
+       2. TOP NAVIGATION BAR (NO LOGO, SLIGHTLY BIGGER/TALLER)
        ========================================================================== */
     .app-topbar {
-      height: 48px;
+      height: 56px; /* Increased height */
       background-color: var(--color-bg-topbar);
       border-bottom: var(--border-light);
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
+      padding: 0 20px;
       z-index: 100;
       flex-shrink: 0;
     }
 
     .topbar-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
       font-family: var(--font-heading);
       font-weight: 800;
-      font-size: 15px;
+      font-size: 18px; /* Taller font focus */
       color: #000000;
       letter-spacing: -0.3px;
-    }
-
-    .topbar-brand svg {
-      flex-shrink: 0;
-    }
-
-    .topbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .topbar-btn {
-      width: 34px;
-      height: 34px;
-      border-radius: var(--radius-sm);
-      background-color: #f8fafc; /* Dull white */
-      border: 1px solid #cbd5e1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      color: #000000; /* Pure black symbol */
-    }
-
-    .topbar-btn:hover {
-      background-color: #ffffff;
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .topbar-btn svg {
-      width: 16px;
-      height: 16px;
-      stroke: #000000;
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
     }
 
     /* ==========================================================================
@@ -329,7 +285,7 @@
     }
 
     /* ==========================================================================
-       4. MAP VIEWPORT & MARKERS
+       4. MAP VIEWPORT & FLOATING CURVED BAR
        ========================================================================== */
     .map-container {
       flex: 1;
@@ -342,9 +298,57 @@
       height: 100%;
     }
 
+    /* Hanging Floating Curved Bar (Centered at Top of Map) */
+    .floating-top-bar {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 500;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(203, 213, 225, 0.8);
+      border-radius: var(--radius-pill); /* Pill/Curved shape */
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.12);
+    }
+
+    .floating-btn {
+      width: 30px; /* Small, compact dimensions */
+      height: 30px;
+      border-radius: 50%;
+      background: transparent;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: #000000;
+    }
+
+    .floating-btn:hover {
+      background-color: #f1f5f9;
+      transform: scale(1.08);
+    }
+
+    .floating-btn svg {
+      width: 15px;
+      height: 15px;
+      stroke: #000000;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
     .map-status-pill {
       position: absolute;
-      top: 14px;
+      top: 54px;
       right: 14px;
       background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(8px);
@@ -400,51 +404,10 @@
 
   <div class="app-viewport-wrapper">
     
-    <!-- Dull White & Pure Black Top Navigation Bar with Logo -->
+    <!-- Taller, Clean Top Navigation Bar -->
     <header class="app-topbar">
       <div class="topbar-brand">
-        <!-- Modern Glass Pin Brand Logo SVG -->
-        <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="32" height="32" rx="10" fill="#000000"/>
-          <path d="M16 6C11.5817 6 8 9.58172 8 14C8 19.5 16 26 16 26C16 26 24 19.5 24 14C24 9.58172 20.4183 6 16 6Z" stroke="#FFFFFF" stroke-width="2.2" stroke-linejoin="round"/>
-          <circle cx="16" cy="13" r="3" fill="#7C3AED"/>
-        </svg>
-        <span>CityGO Live</span>
-      </div>
-
-      <div class="topbar-actions">
-        <!-- CHAT -->
-        <button class="topbar-btn" title="Chat">
-          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </button>
-        <!-- USER ACCOUNT -->
-        <button class="topbar-btn" title="User Account">
-          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </button>
-        <!-- CALL -->
-        <button class="topbar-btn" title="Call">
-          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        </button>
-        <!-- i (INFO) -->
-        <button class="topbar-btn" title="Info">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        </button>
-        <!-- ? (HELP) -->
-        <button class="topbar-btn" title="Help">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </button>
-        <!-- CAB -->
-        <button class="topbar-btn" title="Cab">
-          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="7" rx="2"/><path d="M5 11l2-5h10l2 5"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
-        </button>
-        <!-- AEROPLANE -->
-        <button class="topbar-btn" title="Aeroplane">
-          <svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3.5c-.5-.5-2.5 0-4 1.5L13.5 8.5 5.3 6.7c-.8-.2-1.6.1-2.1.7l-.6.6 5.3 3.8-3.2 3.2-2.1-.7c-.4-.1-.9 0-1.2.3l-.4.4 2.8 2.8 2.8 2.8.4-.4c.3-.3.4-.8.3-1.2l-.7-2.1 3.2-3.2 3.8 5.3.6-.6c.6-.5.9-1.3.7-2.1z"/></svg>
-        </button>
-        <!-- TRAIN -->
-        <button class="topbar-btn" title="Train">
-          <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="13" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="M8 19l-3 3"/><path d="M16 19l3 3"/><circle cx="8" cy="15" r="1"/><circle cx="16" cy="15" r="1"/></svg>
-        </button>
+        CityGO Live
       </div>
     </header>
 
@@ -480,6 +443,43 @@
 
       <!-- Map Viewport -->
       <main class="map-container">
+
+        <!-- Hanging Floating Curved Bar (Top-Center of Map) -->
+        <div class="floating-top-bar">
+          <!-- CHAT -->
+          <button class="floating-btn" title="Chat">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </button>
+          <!-- USER ACCOUNT -->
+          <button class="floating-btn" title="User Account">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </button>
+          <!-- CALL -->
+          <button class="floating-btn" title="Call">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </button>
+          <!-- i (INFO) -->
+          <button class="floating-btn" title="Info">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </button>
+          <!-- ? (HELP) -->
+          <button class="floating-btn" title="Help">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </button>
+          <!-- CAB -->
+          <button class="floating-btn" title="Cab">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="7" rx="2"/><path d="M5 11l2-5h10l2 5"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+          </button>
+          <!-- AEROPLANE -->
+          <button class="floating-btn" title="Aeroplane">
+            <svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3.5c-.5-.5-2.5 0-4 1.5L13.5 8.5 5.3 6.7c-.8-.2-1.6.1-2.1.7l-.6.6 5.3 3.8-3.2 3.2-2.1-.7c-.4-.1-.9 0-1.2.3l-.4.4 2.8 2.8 2.8 2.8.4-.4c.3-.3.4-.8.3-1.2l-.7-2.1 3.2-3.2 3.8 5.3.6-.6c.6-.5.9-1.3.7-2.1z"/></svg>
+          </button>
+          <!-- TRAIN -->
+          <button class="floating-btn" title="Train">
+            <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="13" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="M8 19l-3 3"/><path d="M16 19l3 3"/><circle cx="8" cy="15" r="1"/><circle cx="16" cy="15" r="1"/></svg>
+          </button>
+        </div>
+
         <div id="map-status" class="map-status-pill">⚡ Updating live places...</div>
         <div id="map-viewport"></div>
       </main>
@@ -579,7 +579,6 @@
         statusPill.style.display = 'block';
         const s = bounds.getSouth(), w = bounds.getWest(), n = bounds.getNorth(), e = bounds.getEast();
 
-        // High-speed Overpass query fetching live spots while strictly ignoring residential apartments
         const query = `[out:json][timeout:10];(node["amenity"](${s},${w},${n},${e});node["shop"](${s},${w},${n},${e});node["tourism"](${s},${w},${n},${e}););out center 40;`;
 
         try {
@@ -598,7 +597,6 @@
               const t = el.tags || {};
               const { cat, emoji, nameFallback } = resolveCategory(t);
               
-              // Ensure English Title
               const rawName = t['name:en'] || t.name || nameFallback;
               const englishName = cleanToEnglishText(rawName, nameFallback);
 
