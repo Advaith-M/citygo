@@ -32,8 +32,8 @@
   /* Precision Balanced Outlines (Crisp & High-Tech) */
   --border-clean: 1px solid #cbd5e1;
   --border-subtle: 1px solid #e2e8f0;
-  --border-focus: 1px solid #2563eb;
-  --border-active: 1px solid #94a3b8;
+  --border-focus: 1px solid #000000;
+  --border-active: 1px solid #000000;
 
   /* Depth Shadows */
   --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
@@ -215,53 +215,68 @@ body, html {
   background-color: var(--accent-emerald);
 }
 
-/* NEW HIGH-TECH TOPBAR ACTION BUTTONS */
+/* --------------------------------------------------------------------------
+   4. HIGH-TECH LOGO BUTTON INTERACTIVE STATES (BLACK OUTLINE & ANIMATIONS)
+   -------------------------------------------------------------------------- */
 .topbar-action-group {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   margin-left: 8px;
 }
 
-.luxury-icon-btn {
+/* Base Logo Button Styling */
+.luxury-icon-only-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 12px;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   background: var(--bg-surface) !important;
   border: var(--border-clean) !important;
   border-radius: var(--radius-md);
-  color: var(--text-primary) !important;
-  font-size: 12px;
-  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none !important;
   box-shadow: var(--shadow-xs);
+  position: relative;
+  z-index: 1;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+              outline 0.15s ease,
+              border-color 0.15s ease,
+              box-shadow 0.18s ease;
 }
 
-.luxury-icon-btn svg {
-  stroke: var(--text-secondary);
-  transition: stroke 0.2s ease;
+.luxury-icon-only-btn svg {
+  stroke: #000000 !important;
+  transition: stroke 0.15s ease;
 }
 
-.luxury-icon-btn:hover {
-  background: var(--bg-subtle) !important;
-  border-color: var(--accent-blue) !important;
-  color: var(--accent-blue) !important;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+/* Hover State: Pure Black Outline + Enlarges Size */
+.luxury-icon-only-btn:hover {
+  outline: 2px solid #000000 !important;
+  outline-offset: 3px !important;
+  border-color: #000000 !important;
+  transform: scale(1.14) translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  z-index: 10;
 }
 
-.luxury-icon-btn:hover svg {
-  stroke: var(--accent-blue);
+/* Active/Click State: Shrinks Down Immediately */
+.luxury-icon-only-btn:active {
+  transform: scale(0.92) translateY(0) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  outline-offset: 1px !important;
 }
 
-.luxury-icon-btn:active {
-  transform: translateY(0);
+/* Mouse Leave / Non-Hovered State: Removes Outline Cleanly */
+.luxury-icon-only-btn:not(:hover):not(:focus-visible) {
+  outline: none !important;
+  outline-offset: 0 !important;
+  transform: scale(1);
 }
 
 /* --------------------------------------------------------------------------
-   4. SIDEBAR PANEL & COLLAPSE / RE-OPEN MECHANIC
+   5. SIDEBAR PANEL & COLLAPSE / RE-OPEN MECHANIC
    -------------------------------------------------------------------------- */
 .compact-sidebar {
   display: flex;
@@ -316,16 +331,27 @@ body, html {
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), outline 0.15s ease;
   box-shadow: var(--shadow-xs);
   z-index: 30;
+  outline: none;
 }
 
 .sidebar-toggle-btn:hover {
-  background: var(--accent-blue) !important;
-  color: #ffffff !important;
-  border-color: var(--accent-blue) !important;
-  box-shadow: var(--shadow-sm);
+  outline: 2px solid #000000 !important;
+  outline-offset: 2px !important;
+  border-color: #000000 !important;
+  transform: scale(1.12);
+  background: var(--bg-subtle) !important;
+  color: #000000 !important;
+}
+
+.sidebar-toggle-btn:active {
+  transform: scale(0.92);
+}
+
+.sidebar-toggle-btn:not(:hover):not(:focus-visible) {
+  outline: none !important;
 }
 
 /* SIDEBAR COLLAPSED STATE MECHANIC */
@@ -365,7 +391,7 @@ body, html {
 }
 
 .luxury-search:focus-within {
-  border-color: var(--accent-blue) !important;
+  border-color: #000000 !important;
   background: var(--bg-surface) !important;
   box-shadow: var(--shadow-sm);
 }
@@ -394,7 +420,7 @@ body, html {
 }
 
 /* --------------------------------------------------------------------------
-   5. FILTER CHIPS & SUB-FILTER BAR
+   6. FILTER CHIPS & SUB-FILTER BAR
    -------------------------------------------------------------------------- */
 .filter-chips-row {
   display: flex;
@@ -421,19 +447,30 @@ body, html {
   font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.15s ease, outline 0.15s ease, background-color 0.15s ease;
   box-shadow: var(--shadow-xs);
+  outline: none;
 }
 
 .chip-btn:hover {
-  background: var(--bg-subtle);
-  border-color: var(--accent-blue);
-  color: var(--accent-blue);
+  outline: 2px solid #000000 !important;
+  outline-offset: 2px !important;
+  border-color: #000000 !important;
+  transform: scale(1.06);
+  color: #000000;
+}
+
+.chip-btn:active {
+  transform: scale(0.95);
+}
+
+.chip-btn:not(:hover):not(:focus-visible) {
+  outline: none !important;
 }
 
 .chip-btn.active {
-  background: var(--accent-blue);
-  border-color: var(--accent-blue);
+  background: #000000;
+  border-color: #000000;
   color: #ffffff;
 }
 
@@ -490,7 +527,7 @@ body, html {
 }
 
 /* --------------------------------------------------------------------------
-   6. CARDS LIST FEED
+   7. CARDS LIST FEED
    -------------------------------------------------------------------------- */
 .shop-cards-list {
   flex: 1;
@@ -515,9 +552,15 @@ body, html {
 }
 
 .compact-card:hover {
-  border-color: var(--accent-blue) !important;
+  border-color: #000000 !important;
+  outline: 2px solid #000000 !important;
+  outline-offset: 1px !important;
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
+}
+
+.compact-card:not(:hover) {
+  outline: none !important;
 }
 
 .card-icon-box {
@@ -593,7 +636,7 @@ body, html {
 }
 
 /* --------------------------------------------------------------------------
-   7. MODAL DRAWER & TILES
+   8. MODAL DRAWER & TILES
    -------------------------------------------------------------------------- */
 .modal-overlay {
   position: fixed;
@@ -649,11 +692,23 @@ body, html {
   cursor: pointer;
   z-index: 10;
   box-shadow: var(--shadow-xs);
+  outline: none;
+  transition: transform 0.15s ease, outline 0.15s ease;
 }
 
 .modal-close-btn:hover {
-  background: var(--bg-subtle);
-  color: var(--text-primary);
+  outline: 2px solid #000000 !important;
+  outline-offset: 2px !important;
+  transform: scale(1.12);
+  color: #000000;
+}
+
+.modal-close-btn:active {
+  transform: scale(0.92);
+}
+
+.modal-close-btn:not(:hover) {
+  outline: none !important;
 }
 
 .luxury-banner {
@@ -750,19 +805,25 @@ body, html {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.15s ease, outline 0.15s ease;
+  outline: none;
 }
 
 .luxury-btn-primary {
-  background: var(--accent-blue) !important;
+  background: var(--text-primary) !important;
   color: #ffffff !important;
   border: none !important;
   box-shadow: var(--shadow-sm);
 }
 
 .luxury-btn-primary:hover {
-  background: var(--accent-blue-hover) !important;
-  box-shadow: var(--shadow-md);
+  outline: 2px solid #000000 !important;
+  outline-offset: 3px !important;
+  transform: scale(1.05);
+}
+
+.luxury-btn-primary:active {
+  transform: scale(0.95);
 }
 
 .luxury-btn-secondary {
@@ -772,5 +833,16 @@ body, html {
 }
 
 .luxury-btn-secondary:hover {
-  background: var(--bg-subtle) !important;
+  outline: 2px solid #000000 !important;
+  outline-offset: 3px !important;
+  border-color: #000000 !important;
+  transform: scale(1.05);
+}
+
+.luxury-btn-secondary:active {
+  transform: scale(0.95);
+}
+
+.action-btn:not(:hover) {
+  outline: none !important;
 }
