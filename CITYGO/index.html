@@ -5,19 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CityGo Vector GIS Explorer HUD</title>
   
-  <!-- Fonts -->
+  <!-- System Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Outfit:wght@700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Core Stylesheet -->
+  <!-- Leaflet Interactive Map Engine CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  
+  <!-- Core Luxury HUD Stylesheet -->
   <link rel="stylesheet" href="css/luxury-core.css">
+
+  <!-- Leaflet Interactive Map Engine JavaScript -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
   <div class="app-viewport-wrapper">
     
     <!-- ==================================================================== -->
-    <!-- TOP NAVIGATION HUD BAR                                               -->
+    <!-- 1. TOP NAVIGATION HUD BAR                                           -->
     <!-- ==================================================================== -->
     <header class="app-topbar">
       <div class="topbar-left">
@@ -50,6 +56,7 @@
       </div>
 
       <div class="topbar-right">
+        <!-- TOP BAR ACTION BUTTONS GROUP -->
         <div class="topbar-action-group">
           <button class="luxury-icon-only-btn" id="topLayersBtn" title="Layer Controls" aria-label="Layer Controls">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
@@ -62,7 +69,7 @@
     </header>
 
     <!-- ==================================================================== -->
-    <!-- MAIN APPLICATION LAYOUT                                              -->
+    <!-- 2. MAIN APPLICATION LAYOUT                                           -->
     <!-- ==================================================================== -->
     <div class="app-main-layout">
       
@@ -78,9 +85,9 @@
             <h2 class="sidebar-title">CITYGO EXPLORER</h2>
           </div>
 
-          <!-- TOP ACTION BUTTONS MATRIX (ABOVE SEARCH BAR) -->
+          <!-- UTILITY ACTION BUTTONS MATRIX (ABOVE SEARCH BAR) -->
           <div class="quick-utility-matrix">
-            <button class="matrix-btn" id="btnTicket" title="Tickets">
+            <button class="matrix-btn" id="btnTicket" title="Ticket">
               <span class="btn-icon">🎟️</span>
               <span class="btn-text">Ticket</span>
             </button>
@@ -88,25 +95,25 @@
               <span class="btn-icon">🗺️</span>
               <span class="btn-text">Directions</span>
             </button>
-            <button class="matrix-btn" id="btnCall" title="Call Place">
+            <button class="matrix-btn" id="btnCall" title="Call">
               <span class="btn-icon">📞</span>
               <span class="btn-text">Call</span>
             </button>
-            <button class="matrix-btn" id="btnAccount" title="User Account">
+            <button class="matrix-btn" id="btnAccount" title="Account">
               <span class="btn-icon">👤</span>
               <span class="btn-text">Account</span>
             </button>
-            <button class="matrix-btn" id="btnSettings" title="App Settings">
+            <button class="matrix-btn" id="btnSettings" title="Settings">
               <span class="btn-icon">⚙️</span>
               <span class="btn-text">Settings</span>
             </button>
-            <button class="matrix-btn" id="btnCab" title="Book Cab">
+            <button class="matrix-btn" id="btnCab" title="Cab">
               <span class="btn-icon">🚕</span>
               <span class="btn-text">Cab</span>
             </button>
           </div>
 
-          <!-- LIVE INTERACTIVE SEARCH BAR -->
+          <!-- INTERACTIVE SEARCH BAR -->
           <div class="luxury-search search-input-wrapper">
             <span class="search-icon">🔍</span>
             <input type="text" id="searchInput" class="search-input" placeholder="Search live spots, venues..." autocomplete="off" />
@@ -114,13 +121,13 @@
           </div>
         </div>
 
-        <!-- DEFAULT CATEGORIES COMPARTMENT (HIDDEN DURING ACTIVE SEARCH) -->
+        <!-- CATEGORIES COMPARTMENT (HIDDEN WHEN SEARCHING) -->
         <div id="defaultCompartment" class="default-compartment">
           <div class="category-section-header">
             <span class="section-label">CATEGORIES</span>
           </div>
 
-          <!-- ATTRACTIVE BOLTED CATEGORY BUTTONS WITH LOGOS -->
+          <!-- CATEGORY BUTTONS WITH LOGOS -->
           <div class="categories-grid" id="categoryGrid">
             <button class="category-card-btn active" data-category="Food & Drinks">
               <span class="cat-logo">🍔</span>
@@ -148,14 +155,14 @@
             </button>
           </div>
 
-          <!-- SUB-STATS HEADER -->
+          <!-- STATS HEADER -->
           <div class="stats-bar">
             <span id="feedTitle">TOP 7 RECOMMENDED (OPEN)</span>
             <span class="source-tag">LIVE VERIFIED</span>
           </div>
         </div>
 
-        <!-- SEARCH OVERLAY / RESULT STATUS BAR -->
+        <!-- SEARCH OVERLAY STATUS HEADER -->
         <div id="searchCompartmentHeader" class="search-compartment-header" style="display: none;">
           <span id="searchResultLabel" class="search-status-label">PROMPT SEARCH RESULTS (TOP 7)</span>
           <button id="exitSearchBtn" class="exit-search-link">Reset View</button>
@@ -163,32 +170,28 @@
 
         <!-- SCROLLABLE FEED FOR TOP 7 RECOMMENDED PLACES -->
         <div class="shop-cards-list" id="placesFeed">
-          <!-- Dynamic Content Rendered via JS -->
+          <!-- Places are dynamically populated by app.js -->
         </div>
 
         <!-- SIDEBAR FOOTER -->
         <div class="sidebar-footer">
           <span>SYSTEM: <strong class="pulse-text">ACTIVE HUD</strong></span>
-          <span id="liveTimestamp">12:00 PM</span>
+          <span id="liveTimestamp">12:00:00 PM</span>
         </div>
       </aside>
 
-      <!-- MAP INTERFACE VIEWPORT AREA -->
+      <!-- ==================================================================== -->
+      <!-- 3. REAL-TIME INTERACTIVE MAP VIEWPORT AREA                           -->
+      <!-- ==================================================================== -->
       <main class="map-viewport-container">
-        <div class="map-mock-bg">
-          <div class="hud-center-overlay">
-            <div class="hud-card">
-              <h3>CITYGO VECTOR ENGINE v3.0</h3>
-              <p>Select any spot or category in the sidebar to inspect telemetry, directions, ratings, and live booking options.</p>
-            </div>
-          </div>
-        </div>
+        <!-- Leaflet Map Container -->
+        <div id="map" style="width: 100%; height: 100%; z-index: 1;"></div>
       </main>
 
     </div>
   </div>
 
-  <!-- Main JavaScript Controller -->
+  <!-- Application Logic Controller -->
   <script src="js/app.js"></script>
 </body>
 </html>
