@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let mapMarkers = [];
 
   // ------------------------------------------------------------------------
-  // 2. VECTOR MAP INITIALIZATION & CUSTOM THEMING ENGINE
+  // 2. MAP INITIALIZATION & ZOOM LOCKING
   // ------------------------------------------------------------------------
   function initMap() {
     const mapContainer = document.getElementById('map');
@@ -102,15 +102,14 @@ document.addEventListener('DOMContentLoaded', () => {
         map = new maplibregl.Map({
           container: 'map',
           center: [-122.4194, 37.7749],
-          zoom: 13,
-          minZoom: 3,  // Limit zoom out to continent view
-          maxZoom: 18, // Limit zoom in to street/building view
+          zoom: 14.5,  // Zoom level 14.5 ensures building geometry vector tiles load immediately
+          minZoom: 3,   // Continent view maximum zoom-out
+          maxZoom: 18,  // Street/building maximum zoom-in
           style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
         });
 
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
-        // Apply exact design specs dynamically to loaded vector layers
         map.on('load', () => {
           applyCustomMapTheme();
           renderMapMarkers();
@@ -121,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
           zoomControl: false,
           minZoom: 3,
           maxZoom: 18 
-        }).setView([37.7749, -122.4194], 14);
+        }).setView([37.7749, -122.4194], 14.5);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
           maxZoom: 18,
@@ -137,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ------------------------------------------------------------------------
-  // 3. EXACT DESIGN SPECIFICATION STYLING TRANSFORMER
+  // 3. CUSTOM THEME ENGINE (EXACT DESIGN REQUIREMENTS)
   // ------------------------------------------------------------------------
   function applyCustomMapTheme() {
     if (!map || typeof map.getStyle !== 'function') return;
@@ -145,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const style = map.getStyle();
     if (!style || !style.layers) return;
 
-    // 1. Set background / land to bright white
+    // 1. Land and Empty Spaces -> Bright White (#ffffff)
     if (map.getLayer('background')) {
       map.setPaintProperty('background', 'background-color', '#ffffff');
     }
@@ -153,41 +152,51 @@ document.addEventListener('DOMContentLoaded', () => {
     style.layers.forEach(layer => {
       const id = layer.id.toLowerCase();
       const type = layer.type;
+      const sourceLayer = layer['source-layer'] ? layer['source-layer'].toLowerCase() : '';
 
-      // 2. WATER BODIES -> Bright Neon Cyan
-      if (id.includes('water') || id.includes('ocean') || id.includes('river') || id.includes('lake')) {
+      // 2. Water Bodies -> Bright Neon Cyan (#00ffff) & Hide Ocean Lines
+      if (sourceLayer === 'water' || id.includes('water') || id.includes('ocean') || id.includes('river') || id.includes('lake')) {
         if (type === 'fill') {
           map.setPaintProperty(layer.id, 'fill-color', '#00ffff');
         } else if (type === 'line') {
-          map.setLayoutProperty(layer.id, 'visibility', 'none'); // Remove shore/ocean lines
+          map.setLayoutProperty(layer.id, 'visibility', 'none');
         }
       }
 
-      // 3. ERASE ALL BORDER LINES, OCEAN LINES, AND BOUNDARY SEPARATORS
-      if (id.includes('boundary') || id.includes('border') || id.includes('admin') || id.includes('outline') || id.includes('coast')) {
+      // 3. Erase Border Lines, Coastlines & Administrative Separators
+      if (sourceLayer === 'boundary' || id.includes('boundary') || id.includes('border') || id.includes('admin') || id.includes('coast') || id.includes('outline')) {
         map.setLayoutProperty(layer.id, 'visibility', 'none');
       }
 
-      // 4. BUILDINGS -> Very Light Shade of Gray
-      if (id.includes('building')) {
+      // 4. Building Footprints -> Very Light Gray (#e5e7eb) with Mini-figure Shape Outlines (#cbd5e1)
+      if (sourceLayer === 'building' || id.includes('building')) {
         if (type === 'fill' || type === 'fill-extrusion') {
+          map.setLayoutProperty(layer.id, 'visibility', 'visible');
           map.setPaintProperty(layer.id, 'fill-color', '#e5e7eb');
-          map.setPaintProperty(layer.id, 'fill-outline-color', '#d1d5db');
+          map.setPaintProperty(layer.id, 'fill-outline-color', '#cbd5e1');
+          if (type === 'fill-extrusion') {
+            map.setPaintProperty(layer.id, 'fill-extrusion-color', '#e5e7eb');
+          }
         }
       }
 
-      // 5. STREETS & ROADS -> Darker Shade of Gray
-      if (id.includes('road') || id.includes('transport') || id.includes('street') || id.includes('highway') || id.includes('bridge') || id.includes('tunnel')) {
+      // 5. Streets & Roads -> Darker Shade of Gray (#475569)
+      if (sourceLayer === 'transportation' || sourceLayer === 'road' || id.includes('road') || id.includes('transport') || id.includes('street') || id.includes('highway') || id.includes('bridge') || id.includes('tunnel')) {
         if (type === 'line') {
           map.setPaintProperty(layer.id, 'line-color', '#475569');
         }
       }
 
-      // 6. ROAD NAMES -> White Text with Black Outline
-      if (type === 'symbol' && (id.includes('road') || id.includes('transport') || id.includes('street'))) {
+      // 6. Road Names -> White Text (#ffffff) with Small Black Outline (#000000)
+      if (type === 'symbol' && (sourceLayer.includes('transport') || sourceLayer.includes('road') || id.includes('road') || id.includes('street'))) {
         map.setPaintProperty(layer.id, 'text-color', '#ffffff');
         map.setPaintProperty(layer.id, 'text-halo-color', '#000000');
         map.setPaintProperty(layer.id, 'text-halo-width', 1.5);
+      }
+
+      // 7. City and District Names -> Always Visible Worldwide
+      if (type === 'symbol' && (sourceLayer === 'place' || sourceLayer === 'poi' || id.includes('place') || id.includes('city') || id.includes('district') || id.includes('label'))) {
+        map.setLayoutProperty(layer.id, 'visibility', 'visible');
       }
     });
   }
