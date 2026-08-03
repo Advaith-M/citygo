@@ -1,0 +1,329 @@
+/* ==========================================================================
+   CITYGO SYSTEM ARCHITECTURE - INTERACTIVE COMPONENTS & MODAL STYLES
+   ==========================================================================
+   File Name: css/components.css
+   Role: Styles the slide-out venue detail modal panel, image galleries,
+         review bubbles, action buttons, custom scrollbars, and mobile responsiveness.
+   Dependencies: css/main.css, css/luxury-core.css
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. MODAL OVERLAY & SLIDE-OUT PANEL
+   -------------------------------------------------------------------------- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(18, 24, 38, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-panel {
+  width: 100%;
+  max-width: 520px;
+  height: 100%;
+  background: var(--color-bg-surface);
+  box-shadow: -10px 0 40px rgba(18, 24, 38, 0.15);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-overlay.active .modal-panel {
+  transform: translateX(0);
+}
+
+/* Modal Close Button */
+.modal-close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  border: var(--border-light);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  z-index: 10;
+  transition: var(--transition-bubbly);
+  box-shadow: var(--shadow-bubbly-sm);
+}
+
+.modal-close-btn:hover {
+  background: var(--color-bg-surface);
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: var(--shadow-bubbly-md);
+  color: var(--color-accent-pink);
+}
+
+/* --------------------------------------------------------------------------
+   2. VENUE MODAL CONTENT & HERO GALLERY
+   -------------------------------------------------------------------------- */
+.modal-hero {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  background-color: var(--color-bg-subtle);
+}
+
+.modal-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal-content-body {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Header & Badges */
+.modal-header-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-category-tag {
+  display: inline-block;
+  padding: 6px 14px;
+  background: var(--color-accent-purple-soft);
+  color: var(--color-accent-purple);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modal-title {
+  font-family: var(--font-heading);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.modal-stats-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.modal-rating-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-accent-gold);
+  background: var(--color-accent-gold-soft);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.modal-price-badge {
+  color: var(--color-text-secondary);
+  background: var(--color-bg-subtle);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.modal-hours-badge {
+  color: var(--color-text-muted);
+}
+
+/* Info Cards */
+.modal-info-card {
+  background: var(--color-bg-subtle);
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  border: var(--border-light);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.modal-info-icon {
+  font-size: 18px;
+  margin-top: 2px;
+}
+
+.modal-description {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* Photo Gallery Grid */
+.modal-gallery-title {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 12px;
+}
+
+.modal-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.gallery-thumb {
+  width: 100%;
+  height: 100px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  transition: var(--transition-bubbly);
+  cursor: pointer;
+}
+
+.gallery-thumb:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-bubbly-md);
+}
+
+/* --------------------------------------------------------------------------
+   3. REVIEWS & COMMUNITY FEEDBACK
+   -------------------------------------------------------------------------- */
+.modal-reviews-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.review-bubble-card {
+  background: var(--color-bg-surface);
+  border: var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-bubbly-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.review-author-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.review-author-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.review-stars {
+  color: var(--color-accent-gold);
+  font-size: 12px;
+}
+
+.review-text {
+  font-size: 13.5px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* --------------------------------------------------------------------------
+   4. BUBBLY ACTION BUTTONS & UTILITIES
+   -------------------------------------------------------------------------- */
+.bubbly-action-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--color-accent-purple), var(--color-accent-pink));
+  color: var(--color-text-on-accent);
+  border: none;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-bubbly-lg);
+  transition: var(--transition-bubbly);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.bubbly-action-btn:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 20px 45px rgba(138, 79, 255, 0.25);
+}
+
+.bubbly-action-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(140, 152, 169, 0.3);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 152, 169, 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   5. MOBILE RESPONSIVE BREAKPOINTS
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .app-layout-container {
+    flex-direction: column-reverse;
+  }
+
+  .sidebar-container {
+    width: 100%;
+    height: 50vh;
+  }
+
+  .map-viewport-container {
+    width: 100%;
+    height: 50vh;
+  }
+
+  .modal-panel {
+    max-width: 100%;
+  }
+}
