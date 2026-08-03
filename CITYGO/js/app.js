@@ -91,98 +91,24 @@ document.addEventListener('DOMContentLoaded', () => {
   let mapMarkers = [];
 
   // ------------------------------------------------------------------------
-  // 2. BULLETPROOF VECTOR MAP INITIALIZATION
+  // 2. ZERO-ERROR MAP INITIALIZATION
   // ------------------------------------------------------------------------
   function initMap() {
     const mapContainer = document.getElementById('map');
     if (!mapContainer) return;
 
     try {
-      // Primary: MapLibre GL JS Vector Engine
+      // MapLibre GL JS Vector Engine
       if (typeof maplibregl !== 'undefined') {
         map = new maplibregl.Map({
           container: 'map',
           center: [-122.4194, 37.7749],
           zoom: 13,
-          style: {
-            version: 8,
-            /* 
-             * CRITICAL GLYPHS FIX: Prevents layout.text-field missing glyphs error
-             */
-            glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
-            sources: {
-              'openmaptiles': {
-                type: 'vector',
-                url: 'https://demotiles.maplibre.org/tiles/tiles.json'
-              }
-            },
-            layers: [
-              {
-                id: 'background',
-                type: 'background',
-                paint: { 'background-color': '#f8fafc' }
-              },
-              {
-                id: 'water',
-                type: 'fill',
-                source: 'openmaptiles',
-                'source-layer': 'water',
-                paint: { 'fill-color': '#cbd5e1' }
-              },
-              {
-                id: 'roads',
-                type: 'line',
-                source: 'openmaptiles',
-                'source-layer': 'transportation',
-                paint: {
-                  'line-color': '#ffffff',
-                  'line-width': 2
-                }
-              },
-              {
-                id: 'building-3d',
-                type: 'fill',
-                source: 'openmaptiles',
-                'source-layer': 'building',
-                paint: {
-                  'fill-color': '#e2e8f0',
-                  'fill-outline-color': '#cbd5e1'
-                }
-              },
-              {
-                id: 'poi-labels-4',
-                type: 'symbol',
-                source: 'openmaptiles',
-                'source-layer': 'poi',
-                layout: {
-                  'text-field': ['get', 'name'],
-                  'text-size': 11,
-                  'text-font': ['Open Sans Regular']
-                },
-                paint: {
-                  'text-color': '#334155',
-                  'text-halo-color': '#ffffff',
-                  'text-halo-width': 1
-                }
-              },
-              {
-                id: 'place-labels-5',
-                type: 'symbol',
-                source: 'openmaptiles',
-                'source-layer': 'place',
-                layout: {
-                  'text-field': ['get', 'name'],
-                  'text-size': 13,
-                  'text-font': ['Open Sans Bold']
-                },
-                paint: {
-                  'text-color': '#0f172a',
-                  'text-halo-color': '#ffffff',
-                  'text-halo-width': 1.5
-                }
-              }
-            ]
-          }
+          /* 
+           * Passing the canonical pre-built style URL eliminates all 
+           * layer mismatches (water, roads, buildings, labels, etc.)
+           */
+          style: 'https://demotiles.maplibre.org/style.json'
         });
 
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
@@ -199,20 +125,29 @@ document.addEventListener('DOMContentLoaded', () => {
         L.control.zoom({ position: 'topright' }).addTo(map);
       }
     } catch (err) {
-      console.warn('Map initialization operating in standard mode:', err);
+      console.warn('Map initialization operating in fallback mode:', err);
     }
 
-    renderMapMarkers();
+    // Safely render markers only after style initialization
+    if (map) {
+      if (typeof maplibregl !== 'undefined' && map instanceof maplibregl.Map) {
+        map.on('load', () => {
+          renderMapMarkers();
+        });
+      } else {
+        renderMapMarkers();
+      }
+    }
   }
 
   // ------------------------------------------------------------------------
-  // 3. MAP MARKERS RENDERER (GLOWING RADAR VECTOR HUD PIN)
+  // 3. MAP MARKERS RENDERER (HUD RADAR PINS)
   // ------------------------------------------------------------------------
   function renderMapMarkers() {
     if (!map) return;
     const filtered = getFilteredPlaces();
 
-    // Safely clear previous markers
+    // Clear existing markers cleanly
     mapMarkers.forEach(marker => {
       if (marker && typeof marker.remove === 'function') {
         marker.remove();
@@ -221,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
     mapMarkers = [];
 
     filtered.forEach(place => {
-      // MapLibre Rendering Engine
       if (typeof maplibregl !== 'undefined' && map instanceof maplibregl.Map) {
         const el = document.createElement('div');
         el.className = 'custom-hud-marker';
@@ -233,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         const popup = new maplibregl.Popup({ offset: 12 }).setHTML(`
-          <div style="padding: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">
+          <div style="padding: 4px; font-family: sans-serif;">
             <strong style="font-size: 12px; color: #0f172a;">${place.name}</strong><br/>
             <span style="font-size: 10px; color: #64748b;">${place.address}</span>
           </div>
@@ -246,7 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         mapMarkers.push(marker);
       } 
-      // Leaflet Fallback Engine
       else if (typeof L !== 'undefined') {
         const hudIcon = L.divIcon({
           className: 'custom-hud-marker',
@@ -270,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ------------------------------------------------------------------------
-  // 4. DATA FILTERING ENGINE
+  // 4. FILTERING ENGINE
   // ------------------------------------------------------------------------
   function getFilteredPlaces() {
     return state.places.filter(place => {
@@ -285,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ------------------------------------------------------------------------
-  // 5. SIDEBAR UI COMPONENT RENDERER
+  // 5. SIDEBAR UI RENDERER
   // ------------------------------------------------------------------------
   function buildStarRatingHTML(rating, reviews) {
     const fullStars = Math.floor(rating);
@@ -312,8 +245,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (places.length === 0) {
       cardsContainer.innerHTML = `
-        <div style="padding: 24px 12px; text-align: center; color: var(--text-muted); font-size: 11px; font-weight: 600;">
-          No telemetry results match criteria.
+        <div style="padding: 24px 12px; text-align: center; color: #64748b; font-size: 11px; font-weight: 600;">
+          No points of interest match criteria.
         </div>
       `;
       return;
@@ -321,7 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     cardsContainer.innerHTML = places.map(place => `
       <div class="place-card" data-id="${place.id}">
-        <div class="live-status-dot ${place.isOpen ? 'dot-open' : 'dot-closed'}" title="${place.isOpen ? 'Live / Open' : 'Closed'}"></div>
+        <div class="live-status-dot ${place.isOpen ? 'dot-open' : 'dot-closed'}" title="${place.isOpen ? 'Open' : 'Closed'}"></div>
         <div class="card-main-content">
           <div class="card-title-row">
             <span class="card-place-name">${place.name}</span>
@@ -333,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `).join('');
 
-    // Attach card click handlers for smooth map flying
+    // Attach card click handlers
     document.querySelectorAll('.place-card').forEach(card => {
       card.addEventListener('click', () => {
         const id = parseInt(card.getAttribute('data-id'), 10);
@@ -351,9 +284,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ------------------------------------------------------------------------
-  // 6. UI LISTENERS & INTERACTION CONTROLLERS
+  // 6. EVENT LISTENERS
   // ------------------------------------------------------------------------
-  // Sidebar Collapse Mechanic
   if (sidebarToggleBtn && sidebar) {
     sidebarToggleBtn.addEventListener('click', () => {
       state.isSidebarCollapsed = !state.isSidebarCollapsed;
@@ -367,7 +299,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Category Filter Buttons
   categoryBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       categoryBtns.forEach(b => b.classList.remove('active'));
@@ -379,7 +310,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Search Input Processing
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       state.searchQuery = e.target.value.trim();
@@ -388,7 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Clear Search Input Button
   if (searchClearBtn) {
     searchClearBtn.addEventListener('click', () => {
       if (searchInput) searchInput.value = '';
@@ -398,7 +327,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // District Selector Dropdown
   if (districtSelect) {
     districtSelect.addEventListener('change', (e) => {
       state.currentDistrict = e.target.value;
@@ -407,7 +335,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Quick Utility Matrix Buttons
   matrixBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const type = btn.getAttribute('data-action');
