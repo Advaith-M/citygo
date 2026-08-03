@@ -91,63 +91,114 @@ document.addEventListener('DOMContentLoaded', () => {
   let mapMarkers = [];
 
   // ------------------------------------------------------------------------
-  // 2. ZERO-ERROR MAP INITIALIZATION
+  // 2. VECTOR MAP INITIALIZATION & CUSTOM THEMING ENGINE
   // ------------------------------------------------------------------------
   function initMap() {
     const mapContainer = document.getElementById('map');
     if (!mapContainer) return;
 
     try {
-      // MapLibre GL JS Vector Engine
       if (typeof maplibregl !== 'undefined') {
         map = new maplibregl.Map({
           container: 'map',
           center: [-122.4194, 37.7749],
           zoom: 13,
-          /* 
-           * Passing the canonical pre-built style URL eliminates all 
-           * layer mismatches (water, roads, buildings, labels, etc.)
-           */
-          style: 'https://demotiles.maplibre.org/style.json'
+          minZoom: 3,  // Limit zoom out to continent view
+          maxZoom: 18, // Limit zoom in to street/building view
+          style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
         });
 
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
-      } 
-      // Secondary Fallback: Leaflet.js
-      else if (typeof L !== 'undefined') {
-        map = L.map('map', { zoomControl: false }).setView([37.7749, -122.4194], 14);
+
+        // Apply exact design specs dynamically to loaded vector layers
+        map.on('load', () => {
+          applyCustomMapTheme();
+          renderMapMarkers();
+        });
+
+      } else if (typeof L !== 'undefined') {
+        map = L.map('map', { 
+          zoomControl: false,
+          minZoom: 3,
+          maxZoom: 18 
+        }).setView([37.7749, -122.4194], 14);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-          maxZoom: 19,
+          maxZoom: 18,
           attribution: '&copy; OpenStreetMap &copy; CARTO'
         }).addTo(map);
 
         L.control.zoom({ position: 'topright' }).addTo(map);
+        renderMapMarkers();
       }
     } catch (err) {
       console.warn('Map initialization operating in fallback mode:', err);
     }
-
-    // Safely render markers only after style initialization
-    if (map) {
-      if (typeof maplibregl !== 'undefined' && map instanceof maplibregl.Map) {
-        map.on('load', () => {
-          renderMapMarkers();
-        });
-      } else {
-        renderMapMarkers();
-      }
-    }
   }
 
   // ------------------------------------------------------------------------
-  // 3. MAP MARKERS RENDERER (HUD RADAR PINS)
+  // 3. EXACT DESIGN SPECIFICATION STYLING TRANSFORMER
+  // ------------------------------------------------------------------------
+  function applyCustomMapTheme() {
+    if (!map || typeof map.getStyle !== 'function') return;
+
+    const style = map.getStyle();
+    if (!style || !style.layers) return;
+
+    // 1. Set background / land to bright white
+    if (map.getLayer('background')) {
+      map.setPaintProperty('background', 'background-color', '#ffffff');
+    }
+
+    style.layers.forEach(layer => {
+      const id = layer.id.toLowerCase();
+      const type = layer.type;
+
+      // 2. WATER BODIES -> Bright Neon Cyan
+      if (id.includes('water') || id.includes('ocean') || id.includes('river') || id.includes('lake')) {
+        if (type === 'fill') {
+          map.setPaintProperty(layer.id, 'fill-color', '#00ffff');
+        } else if (type === 'line') {
+          map.setLayoutProperty(layer.id, 'visibility', 'none'); // Remove shore/ocean lines
+        }
+      }
+
+      // 3. ERASE ALL BORDER LINES, OCEAN LINES, AND BOUNDARY SEPARATORS
+      if (id.includes('boundary') || id.includes('border') || id.includes('admin') || id.includes('outline') || id.includes('coast')) {
+        map.setLayoutProperty(layer.id, 'visibility', 'none');
+      }
+
+      // 4. BUILDINGS -> Very Light Shade of Gray
+      if (id.includes('building')) {
+        if (type === 'fill' || type === 'fill-extrusion') {
+          map.setPaintProperty(layer.id, 'fill-color', '#e5e7eb');
+          map.setPaintProperty(layer.id, 'fill-outline-color', '#d1d5db');
+        }
+      }
+
+      // 5. STREETS & ROADS -> Darker Shade of Gray
+      if (id.includes('road') || id.includes('transport') || id.includes('street') || id.includes('highway') || id.includes('bridge') || id.includes('tunnel')) {
+        if (type === 'line') {
+          map.setPaintProperty(layer.id, 'line-color', '#475569');
+        }
+      }
+
+      // 6. ROAD NAMES -> White Text with Black Outline
+      if (type === 'symbol' && (id.includes('road') || id.includes('transport') || id.includes('street'))) {
+        map.setPaintProperty(layer.id, 'text-color', '#ffffff');
+        map.setPaintProperty(layer.id, 'text-halo-color', '#000000');
+        map.setPaintProperty(layer.id, 'text-halo-width', 1.5);
+      }
+    });
+  }
+
+  // ------------------------------------------------------------------------
+  // 4. MAP MARKERS RENDERER (HUD RADAR PINS)
   // ------------------------------------------------------------------------
   function renderMapMarkers() {
     if (!map) return;
     const filtered = getFilteredPlaces();
 
-    // Clear existing markers cleanly
     mapMarkers.forEach(marker => {
       if (marker && typeof marker.remove === 'function') {
         marker.remove();
@@ -179,8 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
           .addTo(map);
 
         mapMarkers.push(marker);
-      } 
-      else if (typeof L !== 'undefined') {
+      } else if (typeof L !== 'undefined') {
         const hudIcon = L.divIcon({
           className: 'custom-hud-marker',
           html: `
@@ -203,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ------------------------------------------------------------------------
-  // 4. FILTERING ENGINE
+  // 5. DATA FILTERING ENGINE
   // ------------------------------------------------------------------------
   function getFilteredPlaces() {
     return state.places.filter(place => {
@@ -218,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ------------------------------------------------------------------------
-  // 5. SIDEBAR UI RENDERER
+  // 6. SIDEBAR UI RENDERER
   // ------------------------------------------------------------------------
   function buildStarRatingHTML(rating, reviews) {
     const fullStars = Math.floor(rating);
@@ -266,7 +316,6 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `).join('');
 
-    // Attach card click handlers
     document.querySelectorAll('.place-card').forEach(card => {
       card.addEventListener('click', () => {
         const id = parseInt(card.getAttribute('data-id'), 10);
@@ -284,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ------------------------------------------------------------------------
-  // 6. EVENT LISTENERS
+  // 7. EVENT LISTENERS
   // ------------------------------------------------------------------------
   if (sidebarToggleBtn && sidebar) {
     sidebarToggleBtn.addEventListener('click', () => {
@@ -353,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ------------------------------------------------------------------------
-  // 7. INITIAL EXECUTION
+  // 8. INITIAL EXECUTION
   // ------------------------------------------------------------------------
   initMap();
   renderPlacesList();
