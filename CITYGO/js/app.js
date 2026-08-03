@@ -1,461 +1,433 @@
-/**
- * ==========================================================================
- * CITYGO VECTOR GIS EXPLORER — CORE ENGINE
- * File: js/app.js
- * ==========================================================================
- */
+/* ==========================================================================
+   CITYGO VECTOR GIS EXPLORER — CORE CONTROLLER & MAP ENGINE
+   File: js/app.js
+   ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
-
-  /* ------------------------------------------------------------------------
-     1. REAL-TIME CUSTOM VECTOR MAP ENGINE INITIALIZATION
-     ------------------------------------------------------------------------ */
-  const defaultCoords = [37.7749, -122.4194]; // Downtown Core vector center
-
-  // Initialize Leaflet Map with Strict Zoom Bounds
-  const map = L.map('map', {
-    center: defaultCoords,
-    zoom: 15,
-    minZoom: 3,  // Maximum zoom out: Continent level only
-    maxZoom: 18, // Maximum zoom in: Detailed road and surrounding buildings
-    zoomControl: false
-  });
-
-  // Custom Neon Vector Blueprint Map Style Configuration
-  const customVectorStyle = {
-    "version": 8,
-    "sources": {
-      "openmaptiles": {
-        "type": "vector",
-        "url": "https://demotiles.maplibre.org/tiles/tiles.json"
-      }
-    },
-    "layers": [
-      // 1. Background / Land & Empty Spaces (Bright Pure White)
+  // ------------------------------------------------------------------------
+  // 1. APPLICATION STATE & LOCAL DATASET
+  // ------------------------------------------------------------------------
+  const state = {
+    isSidebarCollapsed: false,
+    activeCategory: 'all',
+    searchQuery: '',
+    currentDistrict: 'all',
+    places: [
       {
-        "id": "background",
-        "type": "background",
-        "paint": {
-          "background-color": "#ffffff"
-        }
+        id: 1,
+        name: 'Aura Luxury Lounge',
+        category: 'nightlife',
+        district: 'downtown',
+        rating: 4.9,
+        reviews: 128,
+        isOpen: true,
+        address: '450 Grand Ave',
+        lat: 37.7749,
+        lng: -122.4194
       },
-      // 2. Water Bodies (Bright Neon Cyan)
       {
-        "id": "water",
-        "type": "fill",
-        "source": "openmaptiles",
-        "source-layer": "water",
-        "paint": {
-          "fill-color": "#00ffff"
-        }
+        id: 2,
+        name: 'Omni Vector Bistro',
+        category: 'dining',
+        district: 'downtown',
+        rating: 4.7,
+        reviews: 94,
+        isOpen: true,
+        address: '102 Market St',
+        lat: 37.7785,
+        lng: -122.4150
       },
-      // 3. Buildings Footprints / Mini Shapes (Light Shade of Gray)
       {
-        "id": "building",
-        "type": "fill",
-        "source": "openmaptiles",
-        "source-layer": "building",
-        "paint": {
-          "fill-color": "#e2e8f0",
-          "fill-outline-color": "#cbd5e1"
-        }
+        id: 3,
+        name: 'Apex Fitness Club',
+        category: 'health',
+        district: 'marina',
+        rating: 4.8,
+        reviews: 210,
+        isOpen: false,
+        address: '88 Waterfront Rd',
+        lat: 37.7810,
+        lng: -122.4230
       },
-      // 4. Streets and Roads (Darker Shade of Gray)
       {
-        "id": "roads",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "transportation",
-        "paint": {
-          "line-color": "#334155",
-          "line-width": {
-            "base": 1.4,
-            "stops": [[6, 1.2], [15, 8], [18, 16]]
-          }
-        }
+        id: 4,
+        name: 'Kuro Artisan Coffee',
+        category: 'cafes',
+        district: 'downtown',
+        rating: 4.9,
+        reviews: 340,
+        isOpen: true,
+        address: '15 Mission St',
+        lat: 37.7720,
+        lng: -122.4120
       },
-      // 5. City and District Place Names
       {
-        "id": "place_label",
-        "type": "symbol",
-        "source": "openmaptiles",
-        "source-layer": "place_label",
-        "layout": {
-          "text-field": "{name:latin}",
-          "text-font": ["Metropolis Bold", "Noto Sans Regular"],
-          "text-size": {
-            "stops": [[3, 10], [8, 14], [15, 18]]
-          }
-        },
-        "paint": {
-          "text-color": "#0f172a",
-          "text-halo-color": "#ffffff",
-          "text-halo-width": 2
-        }
-      },
-      // 6. Road Names (White Text with Black Small Outline)
-      {
-        "id": "road_label",
-        "type": "symbol",
-        "source": "openmaptiles",
-        "source-layer": "transportation_name",
-        "layout": {
-          "text-field": "{name:latin}",
-          "text-font": ["Metropolis Medium", "Noto Sans Regular"],
-          "symbol-placement": "line",
-          "text-size": 11
-        },
-        "paint": {
-          "text-color": "#ffffff",
-          "text-halo-color": "#000000",
-          "text-halo-width": 1.8
-        }
+        id: 5,
+        name: 'Velox Tech Hub',
+        category: 'services',
+        district: 'soho',
+        rating: 4.6,
+        reviews: 52,
+        isOpen: true,
+        address: '500 Tech Blvd',
+        lat: 37.7690,
+        lng: -122.4280
       }
     ]
   };
 
-  // Add Vector Layer to Leaflet
-  L.maplibreGL({
-    style: customVectorStyle
-  }).addTo(map);
-
-  // Add Custom Zoom Control to top-right corner
-  L.control.zoom({ position: 'topright' }).addTo(map);
-
-  // Dynamic Layer Group for Vector Map Pins
-  const markersGroup = L.layerGroup().addTo(map);
-
-  /* ------------------------------------------------------------------------
-     2. HIGH-TECH REAL-TIME DATASET (WITH EXACT GPS COORDINATES)
-     ------------------------------------------------------------------------ */
-  const placesDatabase = [
-    // --- FOOD & DRINKS ---
-    { id: 'fd1', name: 'Apex Artisanal Roasters', category: 'Food & Drinks', rating: 4.9, reviews: 312, isOpen: true, address: '102 Market St', distance: '0.2 km', lat: 37.7755, lng: -122.4180 },
-    { id: 'fd2', name: 'Lumina Sky Lounge', category: 'Food & Drinks', rating: 4.8, reviews: 245, isOpen: true, address: '88 Tower Way', distance: '0.4 km', lat: 37.7770, lng: -122.4160 },
-    { id: 'fd3', name: 'Bistro De Express', category: 'Food & Drinks', rating: 4.7, reviews: 189, isOpen: true, address: '14 West Avenue', distance: '0.6 km', lat: 37.7730, lng: -122.4220 },
-    { id: 'fd4', name: 'Urban Green Cafe', category: 'Food & Drinks', rating: 4.6, reviews: 142, isOpen: true, address: '305 Pine Road', distance: '0.8 km', lat: 37.7710, lng: -122.4150 },
-    { id: 'fd5', name: 'Sushi Master Core', category: 'Food & Drinks', rating: 4.9, reviews: 520, isOpen: true, address: '12 Plaza Boulevard', distance: '1.1 km', lat: 37.7790, lng: -122.4210 },
-    { id: 'fd6', name: 'Velvet Espresso Bar', category: 'Food & Drinks', rating: 4.5, reviews: 98, isOpen: true, address: '77 Commerce St', distance: '1.3 km', lat: 37.7705, lng: -122.4250 },
-    { id: 'fd7', name: 'The Craft Brewery', category: 'Food & Drinks', rating: 4.8, reviews: 410, isOpen: true, address: '201 Dockside Lane', distance: '1.5 km', lat: 37.7810, lng: -122.4140 },
-    { id: 'fd8', name: 'Late Night Diner', category: 'Food & Drinks', rating: 4.1, reviews: 65, isOpen: false, address: '900 Main St', distance: '2.0 km', lat: 37.7680, lng: -122.4300 },
-
-    // --- HOTELS ---
-    { id: 'h1', name: 'Grand Luxury Marquis', category: 'Hotels', rating: 5.0, reviews: 840, isOpen: true, address: '1 City Center Way', distance: '0.3 km', lat: 37.7760, lng: -122.4190 },
-    { id: 'h2', name: 'The Skyline Suites', category: 'Hotels', rating: 4.8, reviews: 412, isOpen: true, address: '50 Highrise Blvd', distance: '0.7 km', lat: 37.7785, lng: -122.4170 },
-    { id: 'h3', name: 'Aura Boutique Hotel', category: 'Hotels', rating: 4.7, reviews: 230, isOpen: true, address: '19 Park Lane', distance: '0.9 km', lat: 37.7725, lng: -122.4240 },
-    { id: 'h4', name: 'Metro Executive Stays', category: 'Hotels', rating: 4.6, reviews: 175, isOpen: true, address: '88 Financial Square', distance: '1.2 km', lat: 37.7800, lng: -122.4130 },
-    { id: 'h5', name: 'Urban Pod Retreat', category: 'Hotels', rating: 4.4, reviews: 310, isOpen: true, address: '404 Transit St', distance: '1.4 km', lat: 37.7695, lng: -122.4210 },
-    { id: 'h6', name: 'Harbor View Lodge', category: 'Hotels', rating: 4.9, reviews: 620, isOpen: true, address: '12 Bay Promenade', distance: '1.8 km', lat: 37.7830, lng: -122.4110 },
-    { id: 'h7', name: 'Crown Heights Resort', category: 'Hotels', rating: 4.8, reviews: 195, isOpen: true, address: '33 Vista Point', distance: '2.2 km', lat: 37.7850, lng: -122.4260 },
-
-    // --- CITYSPOTS ---
-    { id: 'cs1', name: 'Central Vector Park', category: 'CitySpots', rating: 4.9, reviews: 1250, isOpen: true, address: 'Downtown Green Belt', distance: '0.1 km', lat: 37.7745, lng: -122.4200 },
-    { id: 'cs2', name: 'Metropolitan Observatory', category: 'CitySpots', rating: 4.8, reviews: 980, isOpen: true, address: 'Peak Summit Drive', distance: '0.5 km', lat: 37.7765, lng: -122.4230 },
-    { id: 'cs3', name: 'Civic Art Plaza', category: 'CitySpots', rating: 4.7, reviews: 540, isOpen: true, address: '100 Heritage Square', distance: '0.8 km', lat: 37.7715, lng: -122.4180 },
-    { id: 'cs4', name: 'Waterfront Promenade', category: 'CitySpots', rating: 4.9, reviews: 1100, isOpen: true, address: 'Pier 4 Vector Zone', distance: '1.0 km', lat: 37.7820, lng: -122.4150 },
-    { id: 'cs5', name: 'Historical Clock Tower', category: 'CitySpots', rating: 4.5, reviews: 320, isOpen: true, address: 'Old Town Intersection', distance: '1.3 km', lat: 37.7700, lng: -122.4270 },
-    { id: 'cs6', name: 'Botanical Glasshouse', category: 'CitySpots', rating: 4.8, reviews: 450, isOpen: true, address: '50 Ecology Drive', distance: '1.6 km', lat: 37.7685, lng: -122.4130 },
-    { id: 'cs7', name: 'Riverfront Amphitheater', category: 'CitySpots', rating: 4.6, reviews: 290, isOpen: true, address: '77 River Way', distance: '2.1 km', lat: 37.7840, lng: -122.4200 },
-
-    // --- SHOPS ---
-    { id: 's1', name: 'Apex High-Tech Store', category: 'Shops', rating: 4.9, reviews: 670, isOpen: true, address: '44 Innovation St', distance: '0.2 km', lat: 37.7758, lng: -122.4185 },
-    { id: 's2', name: 'Velvet Luxury Fashion', category: 'Shops', rating: 4.8, reviews: 310, isOpen: true, address: '12 Luxury Boulevard', distance: '0.4 km', lat: 37.7772, lng: -122.4175 },
-    { id: 's3', name: 'Modern Design Goods', category: 'Shops', rating: 4.7, reviews: 190, isOpen: true, address: '89 Boutique Row', distance: '0.7 km', lat: 37.7735, lng: -122.4215 },
-    { id: 's4', name: 'Urban Sneaker Vault', category: 'Shops', rating: 4.8, reviews: 820, isOpen: true, address: '202 Market St', distance: '0.9 km', lat: 37.7780, lng: -122.4145 },
-    { id: 's5', name: 'Artisan Leather Co', category: 'Shops', rating: 4.6, reviews: 140, isOpen: true, address: '15 Heritage Lane', distance: '1.2 km', lat: 37.7712, lng: -122.4265 },
-    { id: 's6', name: 'Chronos Timepieces', category: 'Shops', rating: 4.9, reviews: 260, isOpen: true, address: '300 Plaza Circle', distance: '1.5 km', lat: 37.7805, lng: -122.4225 },
-    { id: 's7', name: 'Cyberpunk Collectibles', category: 'Shops', rating: 4.5, reviews: 390, isOpen: true, address: '88 Neon Way', distance: '1.9 km', lat: 37.7835, lng: -122.4285 },
-
-    // --- FACILITY ---
-    { id: 'f1', name: 'Metro Central Station', category: 'Facility', rating: 4.8, reviews: 2100, isOpen: true, address: 'Transit Hub Terminal 1', distance: '0.1 km', lat: 37.7740, lng: -122.4192 },
-    { id: 'f2', name: 'City Hospital & ER', category: 'Facility', rating: 4.9, reviews: 1450, isOpen: true, address: '500 Health Parkway', distance: '0.5 km', lat: 37.7720, lng: -122.4210 },
-    { id: 'f3', name: 'National Civic Library', category: 'Facility', rating: 4.8, reviews: 780, isOpen: true, address: '12 Knowledge Plaza', distance: '0.7 km', lat: 37.7762, lng: -122.4222 },
-    { id: 'f4', name: 'Federal Reserve Bank', category: 'Facility', rating: 4.5, reviews: 210, isOpen: true, address: '1 Financial Way', distance: '1.0 km', lat: 37.7788, lng: -122.4158 },
-    { id: 'f5', name: 'Vector EV Supercharge Station', category: 'Facility', rating: 4.9, reviews: 930, isOpen: true, address: 'Sector 4 Grid', distance: '1.2 km', lat: 37.7702, lng: -122.4165 },
-    { id: 'f6', name: 'City Sports Complex', category: 'Facility', rating: 4.7, reviews: 610, isOpen: true, address: '88 Stadium Drive', distance: '1.6 km', lat: 37.7815, lng: -122.4245 },
-    { id: 'f7', name: 'International Post Hub', category: 'Facility', rating: 4.3, reviews: 340, isOpen: true, address: '10 Logistics Road', distance: '2.0 km', lat: 37.7845, lng: -122.4125 },
-
-    // --- MALLS ---
-    { id: 'm1', name: 'The Pinnacle Galleria', category: 'Malls', rating: 4.9, reviews: 3400, isOpen: true, address: '100 Pinnacle Way', distance: '0.3 km', lat: 37.7768, lng: -122.4188 },
-    { id: 'm2', name: 'Westside Metro Mall', category: 'Malls', rating: 4.7, reviews: 2100, isOpen: true, address: '45 West Avenue', distance: '0.8 km', lat: 37.7728, lng: -122.4238 },
-    { id: 'm3', name: 'Avenue Center Plaza', category: 'Malls', rating: 4.6, reviews: 1800, isOpen: true, address: '88 Main Circle', distance: '1.1 km', lat: 37.7792, lng: -122.4162 },
-    { id: 'm4', name: 'Plaza 360 Complex', category: 'Malls', rating: 4.8, reviews: 1250, isOpen: true, address: '360 Orbital Boulevard', distance: '1.4 km', lat: 37.7818, lng: -122.4218 },
-    { id: 'm5', name: 'Harbor Gateway Mall', category: 'Malls', rating: 4.7, reviews: 990, isOpen: true, address: '1 Bayfront Drive', distance: '1.8 km', lat: 37.7838, lng: -122.4138 },
-    { id: 'm6', name: 'Crown Heights Arcade', category: 'Malls', rating: 4.5, reviews: 740, isOpen: true, address: '77 Summit Road', distance: '2.1 km', lat: 37.7858, lng: -122.4278 },
-    { id: 'm7', name: 'Vector Underground Mall', category: 'Malls', rating: 4.8, reviews: 1620, isOpen: true, address: 'Sub-Level Station 2', distance: '2.5 km', lat: 37.7690, lng: -122.4290 }
-  ];
-
-  /* ------------------------------------------------------------------------
-     3. DOM ELEMENT REFERENCES
-     ------------------------------------------------------------------------ */
-  const sidebar = document.getElementById('appSidebar');
-  const sidebarToggle = document.getElementById('sidebarToggle');
+  // Safe DOM Element Selections
+  const sidebar = document.querySelector('.compact-sidebar');
+  const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
   const searchInput = document.getElementById('searchInput');
   const searchClearBtn = document.getElementById('searchClearBtn');
-  const placesFeed = document.getElementById('placesFeed');
-  const categoryGrid = document.getElementById('categoryGrid');
-  const defaultCompartment = document.getElementById('defaultCompartment');
-  const searchCompartmentHeader = document.getElementById('searchCompartmentHeader');
-  const searchResultLabel = document.getElementById('searchResultLabel');
-  const exitSearchBtn = document.getElementById('exitSearchBtn');
-  const liveTimestamp = document.getElementById('liveTimestamp');
-  const gpsTelemetry = document.getElementById('gpsTelemetry');
   const districtSelect = document.getElementById('districtSelect');
+  const categoryBtns = document.querySelectorAll('.category-card-btn');
+  const cardsContainer = document.getElementById('shopCardsList');
+  const visibleCountEl = document.getElementById('visibleCount');
+  const matrixBtns = document.querySelectorAll('.matrix-btn');
 
-  // Quick matrix button IDs
-  const utilityButtons = ['btnTicket', 'btnDirections', 'btnCall', 'btnAccount', 'btnSettings', 'btnCab'];
+  let map = null;
+  let mapMarkers = [];
 
-  let activeCategory = 'Food & Drinks';
+  // ------------------------------------------------------------------------
+  // 2. BULLETPROOF VECTOR MAP INITIALIZATION
+  // ------------------------------------------------------------------------
+  function initMap() {
+    const mapContainer = document.getElementById('map');
+    if (!mapContainer) return;
 
-  /* ------------------------------------------------------------------------
-     4. RENDER HELPERS (STAR RATINGS, STATUS DOTS, CARD MARKUP)
-     ------------------------------------------------------------------------ */
-  function renderStarRating(rating) {
-    const fullStars = Math.floor(rating);
-    let starsHtml = '';
-    
-    for (let i = 1; i <= 5; i++) {
-      if (i <= fullStars) {
-        starsHtml += `<span class="star-icon">★</span>`;
-      } else {
-        starsHtml += `<span class="star-icon dim">★</span>`;
+    try {
+      // Primary: MapLibre GL JS Vector Engine
+      if (typeof maplibregl !== 'undefined') {
+        map = new maplibregl.Map({
+          container: 'map',
+          center: [-122.4194, 37.7749],
+          zoom: 13,
+          style: {
+            version: 8,
+            /* 
+             * CRITICAL GLYPHS FIX: Prevents layout.text-field missing glyphs error
+             */
+            glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+            sources: {
+              'openmaptiles': {
+                type: 'vector',
+                url: 'https://demotiles.maplibre.org/tiles/tiles.json'
+              }
+            },
+            layers: [
+              {
+                id: 'background',
+                type: 'background',
+                paint: { 'background-color': '#f8fafc' }
+              },
+              {
+                id: 'water',
+                type: 'fill',
+                source: 'openmaptiles',
+                'source-layer': 'water',
+                paint: { 'fill-color': '#cbd5e1' }
+              },
+              {
+                id: 'roads',
+                type: 'line',
+                source: 'openmaptiles',
+                'source-layer': 'transportation',
+                paint: {
+                  'line-color': '#ffffff',
+                  'line-width': 2
+                }
+              },
+              {
+                id: 'building-3d',
+                type: 'fill',
+                source: 'openmaptiles',
+                'source-layer': 'building',
+                paint: {
+                  'fill-color': '#e2e8f0',
+                  'fill-outline-color': '#cbd5e1'
+                }
+              },
+              {
+                id: 'poi-labels-4',
+                type: 'symbol',
+                source: 'openmaptiles',
+                'source-layer': 'poi',
+                layout: {
+                  'text-field': ['get', 'name'],
+                  'text-size': 11,
+                  'text-font': ['Open Sans Regular']
+                },
+                paint: {
+                  'text-color': '#334155',
+                  'text-halo-color': '#ffffff',
+                  'text-halo-width': 1
+                }
+              },
+              {
+                id: 'place-labels-5',
+                type: 'symbol',
+                source: 'openmaptiles',
+                'source-layer': 'place',
+                layout: {
+                  'text-field': ['get', 'name'],
+                  'text-size': 13,
+                  'text-font': ['Open Sans Bold']
+                },
+                paint: {
+                  'text-color': '#0f172a',
+                  'text-halo-color': '#ffffff',
+                  'text-halo-width': 1.5
+                }
+              }
+            ]
+          }
+        });
+
+        map.addControl(new maplibregl.NavigationControl(), 'top-right');
+      } 
+      // Secondary Fallback: Leaflet.js
+      else if (typeof L !== 'undefined') {
+        map = L.map('map', { zoomControl: false }).setView([37.7749, -122.4194], 14);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap &copy; CARTO'
+        }).addTo(map);
+
+        L.control.zoom({ position: 'topright' }).addTo(map);
       }
+    } catch (err) {
+      console.warn('Map initialization operating in standard mode:', err);
     }
-    return starsHtml;
+
+    renderMapMarkers();
   }
 
-  function renderPlaceCard(place) {
-    const statusClass = place.isOpen ? 'dot-open' : 'dot-closed';
+  // ------------------------------------------------------------------------
+  // 3. MAP MARKERS RENDERER (GLOWING RADAR VECTOR HUD PIN)
+  // ------------------------------------------------------------------------
+  function renderMapMarkers() {
+    if (!map) return;
+    const filtered = getFilteredPlaces();
 
-    return `
-      <div class="place-card" data-id="${place.id}" data-lat="${place.lat}" data-lng="${place.lng}">
-        <span class="live-status-dot ${statusClass}" title="${place.isOpen ? 'Live Open' : 'Currently Closed'}"></span>
-        <div class="card-main-content">
-          <div class="card-title-row">
-            <h4 class="card-place-name">${place.name}</h4>
-            <span class="card-place-category">${place.category}</span>
+    // Safely clear previous markers
+    mapMarkers.forEach(marker => {
+      if (marker && typeof marker.remove === 'function') {
+        marker.remove();
+      }
+    });
+    mapMarkers = [];
+
+    filtered.forEach(place => {
+      // MapLibre Rendering Engine
+      if (typeof maplibregl !== 'undefined' && map instanceof maplibregl.Map) {
+        const el = document.createElement('div');
+        el.className = 'custom-hud-marker';
+        el.innerHTML = `
+          <div class="hud-pin-wrapper">
+            <div class="hud-pin-pulse"></div>
+            <div class="hud-pin-core"></div>
           </div>
-          <div class="star-rating-row">
-            <div class="stars-wrapper">${renderStarRating(place.rating)}</div>
-            <span class="rating-score-text">${place.rating.toFixed(1)}</span>
-            <span class="user-reviews-count">(${place.reviews})</span>
+        `;
+
+        const popup = new maplibregl.Popup({ offset: 12 }).setHTML(`
+          <div style="padding: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">
+            <strong style="font-size: 12px; color: #0f172a;">${place.name}</strong><br/>
+            <span style="font-size: 10px; color: #64748b;">${place.address}</span>
           </div>
-          <div class="card-subtitle">${place.address} • <strong>${place.distance}</strong></div>
-        </div>
-      </div>
-    `;
-  }
+        `);
 
-  /* ------------------------------------------------------------------------
-     5. GLOWING HUD MAP MARKERS SYNC LOGIC
-     ------------------------------------------------------------------------ */
-  function updateMapMarkers(places) {
-    markersGroup.clearLayers();
-    const bounds = [];
+        const marker = new maplibregl.Marker({ element: el })
+          .setLngLat([place.lng, place.lat])
+          .setPopup(popup)
+          .addTo(map);
 
-    places.forEach(place => {
-      if (place.lat && place.lng) {
-        
-        // Custom Glowing DivIcon
+        mapMarkers.push(marker);
+      } 
+      // Leaflet Fallback Engine
+      else if (typeof L !== 'undefined') {
         const hudIcon = L.divIcon({
           className: 'custom-hud-marker',
           html: `
             <div class="hud-pin-wrapper">
-              <span class="hud-pin-pulse"></span>
-              <span class="hud-pin-core"></span>
+              <div class="hud-pin-pulse"></div>
+              <div class="hud-pin-core"></div>
             </div>
           `,
           iconSize: [20, 20],
-          iconAnchor: [10, 10],
-          popupAnchor: [0, -10]
+          iconAnchor: [10, 10]
         });
 
-        // Create Vector Marker with Glowing HUD Pin
-        const marker = L.marker([place.lat, place.lng], { icon: hudIcon });
+        const marker = L.marker([place.lat, place.lng], { icon: hudIcon })
+          .bindPopup(`<strong>${place.name}</strong><br/>${place.address}`)
+          .addTo(map);
 
-        const popupContent = `
-          <div style="font-family:'Plus Jakarta Sans',sans-serif; padding:4px;">
-            <strong style="font-size:13px; color:#0f172a; display:block; margin-bottom:2px;">${place.name}</strong>
-            <span style="font-size:10px; color:#2563eb; font-weight:700; background:#eff6ff; padding:2px 5px; border-radius:4px;">${place.category}</span>
-            <span style="font-size:11px; color:#f59e0b; font-weight:700; margin-left:4px;">★ ${place.rating.toFixed(1)}</span>
-            <div style="font-size:10px; color:#64748b; margin-top:4px;">${place.address}</div>
-          </div>
-        `;
-
-        marker.bindPopup(popupContent);
-        markersGroup.addLayer(marker);
-        bounds.push([place.lat, place.lng]);
+        mapMarkers.push(marker);
       }
     });
-
-    // Auto-fit map viewport to active markers safely within limits
-    if (bounds.length > 0) {
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
-    }
   }
 
-  /* ------------------------------------------------------------------------
-     6. FEED DISPLAY LOGIC (STRICT TOP 7 LIMIT, LIVE & OPEN PRIORITY)
-     ------------------------------------------------------------------------ */
-  function updateFeedForCategory(categoryName) {
-    activeCategory = categoryName;
+  // ------------------------------------------------------------------------
+  // 4. DATA FILTERING ENGINE
+  // ------------------------------------------------------------------------
+  function getFilteredPlaces() {
+    return state.places.filter(place => {
+      const matchesCategory = state.activeCategory === 'all' || place.category === state.activeCategory;
+      const matchesQuery = place.name.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+                           place.category.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+                           place.address.toLowerCase().includes(state.searchQuery.toLowerCase());
+      const matchesDistrict = state.currentDistrict === 'all' || place.district === state.currentDistrict;
 
-    // Filter places by category and prioritize OPEN spots (STRICT TOP 7 LIMIT)
-    const categoryPlaces = placesDatabase
-      .filter(p => p.category === categoryName && p.isOpen)
-      .slice(0, 7);
-
-    placesFeed.innerHTML = categoryPlaces.map(p => renderPlaceCard(p)).join('');
-    updateMapMarkers(categoryPlaces);
+      return matchesCategory && matchesQuery && matchesDistrict;
+    });
   }
 
-  function updateFeedForSearch(query) {
-    let searchResults = [];
+  // ------------------------------------------------------------------------
+  // 5. SIDEBAR UI COMPONENT RENDERER
+  // ------------------------------------------------------------------------
+  function buildStarRatingHTML(rating, reviews) {
+    const fullStars = Math.floor(rating);
+    let starsHtml = '';
 
-    if (!query || query.trim() === '') {
-      // Empty input state -> Show Top 7 overall recommended open places
-      searchResults = placesDatabase.filter(p => p.isOpen).slice(0, 7);
-      searchResultLabel.textContent = "TOP 7 RECOMMENDED (LIVE FOCUS)";
-    } else {
-      // Text typed state -> Filter places matching prompt text (STRICT TOP 7 LIMIT)
-      const cleanQuery = query.toLowerCase().trim();
-      searchResults = placesDatabase.filter(p => 
-        p.name.toLowerCase().includes(cleanQuery) || 
-        p.category.toLowerCase().includes(cleanQuery) ||
-        p.address.toLowerCase().includes(cleanQuery)
-      ).slice(0, 7);
-
-      searchResultLabel.textContent = `SEARCH RESULTS FOR "${query.toUpperCase()}" (${searchResults.length})`;
+    for (let i = 1; i <= 5; i++) {
+      starsHtml += `<span class="star-icon ${i <= fullStars ? '' : 'dim'}">★</span>`;
     }
 
-    placesFeed.innerHTML = searchResults.length > 0 
-      ? searchResults.map(p => renderPlaceCard(p)).join('')
-      : `<div style="padding:20px; text-align:center; font-size:12px; color:#64748b;">No matching spots found. Try searching for "Cafe", "Mall", or "Park".</div>`;
-
-    updateMapMarkers(searchResults);
+    return `
+      <div class="star-rating-row">
+        <div class="stars-wrapper">${starsHtml}</div>
+        <span class="rating-score-text">${rating.toFixed(1)}</span>
+        <span class="user-reviews-count">(${reviews})</span>
+      </div>
+    `;
   }
 
-  /* ------------------------------------------------------------------------
-     7. SEARCH EVENT HANDLERS & VIEW MODE SWITCHING
-     ------------------------------------------------------------------------ */
-  function enterSearchView() {
-    defaultCompartment.style.display = 'none';
-    searchCompartmentHeader.style.display = 'flex';
-    searchClearBtn.style.display = 'block';
-    updateFeedForSearch(searchInput.value);
-  }
+  function renderPlacesList() {
+    const places = getFilteredPlaces();
+    if (visibleCountEl) visibleCountEl.textContent = places.length;
 
-  function exitSearchView() {
-    searchInput.value = '';
-    searchClearBtn.style.display = 'none';
-    defaultCompartment.style.display = 'block';
-    searchCompartmentHeader.style.display = 'none';
-    updateFeedForCategory(activeCategory);
-  }
+    if (!cardsContainer) return;
 
-  searchInput.addEventListener('focus', () => {
-    enterSearchView();
-  });
+    if (places.length === 0) {
+      cardsContainer.innerHTML = `
+        <div style="padding: 24px 12px; text-align: center; color: var(--text-muted); font-size: 11px; font-weight: 600;">
+          No telemetry results match criteria.
+        </div>
+      `;
+      return;
+    }
 
-  searchInput.addEventListener('input', (e) => {
-    updateFeedForSearch(e.target.value);
-  });
+    cardsContainer.innerHTML = places.map(place => `
+      <div class="place-card" data-id="${place.id}">
+        <div class="live-status-dot ${place.isOpen ? 'dot-open' : 'dot-closed'}" title="${place.isOpen ? 'Live / Open' : 'Closed'}"></div>
+        <div class="card-main-content">
+          <div class="card-title-row">
+            <span class="card-place-name">${place.name}</span>
+            <span class="card-place-category">${place.category}</span>
+          </div>
+          ${buildStarRatingHTML(place.rating, place.reviews)}
+          <div class="card-subtitle">${place.address}</div>
+        </div>
+      </div>
+    `).join('');
 
-  searchClearBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    updateFeedForSearch('');
-    searchInput.focus();
-  });
-
-  exitSearchBtn.addEventListener('click', () => {
-    exitSearchView();
-  });
-
-  /* ------------------------------------------------------------------------
-     8. CATEGORY SELECTION HANDLERS
-     ------------------------------------------------------------------------ */
-  categoryGrid.addEventListener('click', (e) => {
-    const catBtn = e.target.closest('.category-card-btn');
-    if (!catBtn) return;
-
-    document.querySelectorAll('.category-card-btn').forEach(b => b.classList.remove('active'));
-    catBtn.classList.add('active');
-
-    const selectedCat = catBtn.getAttribute('data-category');
-    updateFeedForCategory(selectedCat);
-  });
-
-  /* ------------------------------------------------------------------------
-     9. SIDEBAR CARD CLICK -> INTERACTIVE MAP PAN & POPUP
-     ------------------------------------------------------------------------ */
-  placesFeed.addEventListener('click', (e) => {
-    const card = e.target.closest('.place-card');
-    if (!card) return;
-
-    const lat = parseFloat(card.getAttribute('data-lat'));
-    const lng = parseFloat(card.getAttribute('data-lng'));
-
-    if (lat && lng) {
-      // Fly map smoothly to selected location
-      map.flyTo([lat, lng], 16, { animate: true, duration: 1.2 });
-
-      // Update telemetry display
-      gpsTelemetry.textContent = `${lat.toFixed(4)}° N, ${Math.abs(lng).toFixed(4)}° W`;
-
-      // Open corresponding popup marker on map
-      markersGroup.eachLayer(layer => {
-        if (layer.getLatLng().lat === lat && layer.getLatLng().lng === lng) {
-          layer.openPopup();
+    // Attach card click handlers for smooth map flying
+    document.querySelectorAll('.place-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = parseInt(card.getAttribute('data-id'), 10);
+        const place = state.places.find(p => p.id === id);
+        
+        if (place && map) {
+          if (typeof maplibregl !== 'undefined' && map.flyTo) {
+            map.flyTo({ center: [place.lng, place.lat], zoom: 15.5, speed: 1.2 });
+          } else if (typeof map.setView === 'function') {
+            map.setView([place.lat, place.lng], 15);
+          }
         }
       });
-    }
-  });
-
-  /* ------------------------------------------------------------------------
-     10. TOP-LEFT SIDEBAR COLLAPSE MECHANIC
-     ------------------------------------------------------------------------ */
-  sidebarToggle.addEventListener('click', () => {
-    sidebar.classList.toggle('collapsed');
-    sidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
-    
-    // Invalidate map size so MapLibre recalculates viewport width smoothly
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 300);
-  });
-
-  /* ------------------------------------------------------------------------
-     11. QUICK UTILITY MATRIX ACTIONS BINDING
-     ------------------------------------------------------------------------ */
-  utilityButtons.forEach(btnId => {
-    const btn = document.getElementById(btnId);
-    if (btn) {
-      btn.addEventListener('click', () => {
-        const actionName = btnId.replace('btn', '');
-        alert(`CITYGO GIS: ${actionName.toUpperCase()} service requested for active vector focus.`);
-      });
-    }
-  });
-
-  /* ------------------------------------------------------------------------
-     12. DISTRICT SELECTOR HANDLER
-     ------------------------------------------------------------------------ */
-  districtSelect.addEventListener('change', (e) => {
-    const district = e.target.value;
-    alert(`CITYGO GIS: Telemetry filter set to ${district.toUpperCase()} District.`);
-  });
-
-  /* ------------------------------------------------------------------------
-     13. INITIALIZATION & LIVE CLOCK
-     ------------------------------------------------------------------------ */
-  function updateLiveClock() {
-    const now = new Date();
-    liveTimestamp.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    });
   }
 
-  setInterval(updateLiveClock, 1000);
-  updateLiveClock();
+  // ------------------------------------------------------------------------
+  // 6. UI LISTENERS & INTERACTION CONTROLLERS
+  // ------------------------------------------------------------------------
+  // Sidebar Collapse Mechanic
+  if (sidebarToggleBtn && sidebar) {
+    sidebarToggleBtn.addEventListener('click', () => {
+      state.isSidebarCollapsed = !state.isSidebarCollapsed;
+      sidebar.classList.toggle('collapsed', state.isSidebarCollapsed);
+      sidebarToggleBtn.textContent = state.isSidebarCollapsed ? '▶' : '◀';
 
-  // Initial feed & map markers load for default category "Food & Drinks"
-  updateFeedForCategory('Food & Drinks');
+      setTimeout(() => {
+        if (map && typeof map.resize === 'function') map.resize();
+        if (map && typeof map.invalidateSize === 'function') map.invalidateSize();
+      }, 310);
+    });
+  }
+
+  // Category Filter Buttons
+  categoryBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      categoryBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.activeCategory = btn.getAttribute('data-category') || 'all';
+
+      renderPlacesList();
+      renderMapMarkers();
+    });
+  });
+
+  // Search Input Processing
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      state.searchQuery = e.target.value.trim();
+      renderPlacesList();
+      renderMapMarkers();
+    });
+  }
+
+  // Clear Search Input Button
+  if (searchClearBtn) {
+    searchClearBtn.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      state.searchQuery = '';
+      renderPlacesList();
+      renderMapMarkers();
+    });
+  }
+
+  // District Selector Dropdown
+  if (districtSelect) {
+    districtSelect.addEventListener('change', (e) => {
+      state.currentDistrict = e.target.value;
+      renderPlacesList();
+      renderMapMarkers();
+    });
+  }
+
+  // Quick Utility Matrix Buttons
+  matrixBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.getAttribute('data-action');
+      if (type === 'reset') {
+        state.activeCategory = 'all';
+        state.searchQuery = '';
+        state.currentDistrict = 'all';
+        if (searchInput) searchInput.value = '';
+        if (districtSelect) districtSelect.value = 'all';
+        categoryBtns.forEach(b => b.classList.remove('active'));
+        if (categoryBtns[0]) categoryBtns[0].classList.add('active');
+        renderPlacesList();
+        renderMapMarkers();
+      }
+    });
+  });
+
+  // ------------------------------------------------------------------------
+  // 7. INITIAL EXECUTION
+  // ------------------------------------------------------------------------
+  initMap();
+  renderPlacesList();
 });
