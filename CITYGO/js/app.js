@@ -8,21 +8,115 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   /* ------------------------------------------------------------------------
-     1. REAL-TIME INTERACTIVE LEAFLET MAP ENGINE INITIALIZATION
+     1. REAL-TIME CUSTOM VECTOR MAP ENGINE INITIALIZATION
      ------------------------------------------------------------------------ */
   const defaultCoords = [37.7749, -122.4194]; // Downtown Core vector center
-  
-  // Initialize Leaflet Map
+
+  // Initialize Leaflet Map with Strict Zoom Bounds
   const map = L.map('map', {
     center: defaultCoords,
-    zoom: 14,
+    zoom: 15,
+    minZoom: 3,  // Maximum zoom out: Continent level only
+    maxZoom: 18, // Maximum zoom in: Detailed road and surrounding buildings
     zoomControl: false
   });
 
-  // Attach OpenStreetMap Tile Layer
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap contributors'
+  // Custom Neon Vector Blueprint Map Style Configuration
+  const customVectorStyle = {
+    "version": 8,
+    "sources": {
+      "openmaptiles": {
+        "type": "vector",
+        "url": "https://demotiles.maplibre.org/tiles/tiles.json"
+      }
+    },
+    "layers": [
+      // 1. Background / Land & Empty Spaces (Bright Pure White)
+      {
+        "id": "background",
+        "type": "background",
+        "paint": {
+          "background-color": "#ffffff"
+        }
+      },
+      // 2. Water Bodies (Bright Neon Cyan)
+      {
+        "id": "water",
+        "type": "fill",
+        "source": "openmaptiles",
+        "source-layer": "water",
+        "paint": {
+          "fill-color": "#00ffff"
+        }
+      },
+      // 3. Buildings Footprints / Mini Shapes (Light Shade of Gray)
+      {
+        "id": "building",
+        "type": "fill",
+        "source": "openmaptiles",
+        "source-layer": "building",
+        "paint": {
+          "fill-color": "#e2e8f0",
+          "fill-outline-color": "#cbd5e1"
+        }
+      },
+      // 4. Streets and Roads (Darker Shade of Gray)
+      {
+        "id": "roads",
+        "type": "line",
+        "source": "openmaptiles",
+        "source-layer": "transportation",
+        "paint": {
+          "line-color": "#334155",
+          "line-width": {
+            "base": 1.4,
+            "stops": [[6, 1.2], [15, 8], [18, 16]]
+          }
+        }
+      },
+      // 5. City and District Place Names
+      {
+        "id": "place_label",
+        "type": "symbol",
+        "source": "openmaptiles",
+        "source-layer": "place_label",
+        "layout": {
+          "text-field": "{name:latin}",
+          "text-font": ["Metropolis Bold", "Noto Sans Regular"],
+          "text-size": {
+            "stops": [[3, 10], [8, 14], [15, 18]]
+          }
+        },
+        "paint": {
+          "text-color": "#0f172a",
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 2
+        }
+      },
+      // 6. Road Names (White Text with Black Small Outline)
+      {
+        "id": "road_label",
+        "type": "symbol",
+        "source": "openmaptiles",
+        "source-layer": "transportation_name",
+        "layout": {
+          "text-field": "{name:latin}",
+          "text-font": ["Metropolis Medium", "Noto Sans Regular"],
+          "symbol-placement": "line",
+          "text-size": 11
+        },
+        "paint": {
+          "text-color": "#ffffff",
+          "text-halo-color": "#000000",
+          "text-halo-width": 1.8
+        }
+      }
+    ]
+  };
+
+  // Add Vector Layer to Leaflet
+  L.maplibreGL({
+    style: customVectorStyle
   }).addTo(map);
 
   // Add Custom Zoom Control to top-right corner
@@ -32,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const markersGroup = L.layerGroup().addTo(map);
 
   /* ------------------------------------------------------------------------
-     2. HIGH-TECH REAL-TIME DATASET (WITH REAL GPS COORDINATES)
+     2. HIGH-TECH REAL-TIME DATASET (WITH EXACT GPS COORDINATES)
      ------------------------------------------------------------------------ */
   const placesDatabase = [
     // --- FOOD & DRINKS ---
@@ -153,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ------------------------------------------------------------------------
-     5. MAP MARKER DYNAMIC SYNC LOGIC
+     5. GLOWING HUD MAP MARKERS SYNC LOGIC
      ------------------------------------------------------------------------ */
   function updateMapMarkers(places) {
     markersGroup.clearLayers();
@@ -161,12 +255,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     places.forEach(place => {
       if (place.lat && place.lng) {
-        // Create Leaflet Vector Marker
-        const marker = L.marker([place.lat, place.lng]);
+        
+        // Custom Glowing DivIcon
+        const hudIcon = L.divIcon({
+          className: 'custom-hud-marker',
+          html: `
+            <div class="hud-pin-wrapper">
+              <span class="hud-pin-pulse"></span>
+              <span class="hud-pin-core"></span>
+            </div>
+          `,
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
+          popupAnchor: [0, -10]
+        });
 
-        // Popup Content
+        // Create Vector Marker with Glowing HUD Pin
+        const marker = L.marker([place.lat, place.lng], { icon: hudIcon });
+
         const popupContent = `
-          <div style="font-family:'Plus Jakarta Sans',sans-serif; padding:2px;">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif; padding:4px;">
             <strong style="font-size:13px; color:#0f172a; display:block; margin-bottom:2px;">${place.name}</strong>
             <span style="font-size:10px; color:#2563eb; font-weight:700; background:#eff6ff; padding:2px 5px; border-radius:4px;">${place.category}</span>
             <span style="font-size:11px; color:#f59e0b; font-weight:700; margin-left:4px;">★ ${place.rating.toFixed(1)}</span>
@@ -180,9 +288,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Auto-fit map viewport to active markers
+    // Auto-fit map viewport to active markers safely within limits
     if (bounds.length > 0) {
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
     }
   }
 
@@ -286,7 +394,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const lat = parseFloat(card.getAttribute('data-lat'));
     const lng = parseFloat(card.getAttribute('data-lng'));
-    const placeId = card.getAttribute('data-id');
 
     if (lat && lng) {
       // Fly map smoothly to selected location
@@ -311,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebar.classList.toggle('collapsed');
     sidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
     
-    // Invalidate map size so Leaflet recalculates viewport width smoothly
+    // Invalidate map size so MapLibre recalculates viewport width smoothly
     setTimeout(() => {
       map.invalidateSize();
     }, 300);
